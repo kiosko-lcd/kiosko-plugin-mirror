@@ -112,6 +112,7 @@ export const tasks = defineWidget({
     file: t.string({
       default: '~/tasks.md',
       format: 'path',
+      risk: 'path',
       label: { en: 'Checklist file', es: 'Fichero de tareas' },
       help: {
         en: 'Markdown with "- [ ] …" boxes under "## Today" and "## Tomorrow"; "@2026-10-14" dates a box.',
@@ -119,7 +120,7 @@ export const tasks = defineWidget({
       },
     }),
     gitlab: t.boolean({ label: { en: 'Add my GitLab issues with a due date', es: 'Añadir mis issues de GitLab con fecha' } }),
-    bin: t.string({ default: 'glab', format: 'path', advanced: true, label: { en: 'glab command', es: 'Comando glab' }, help: { en: 'The GitLab CLI, already logged in.', es: 'El CLI de GitLab, con la sesión iniciada.' } }),
+    bin: t.string({ default: 'glab', format: 'path', risk: 'exec', advanced: true, label: { en: 'glab command', es: 'Comando glab' }, help: { en: 'The GitLab CLI, already logged in.', es: 'El CLI de GitLab, con la sesión iniciada.' } }),
   }),
   intervalMs: 10 * 60_000,
   async fetch({ options, now, log, signal }): Promise<TasksData> {
