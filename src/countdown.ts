@@ -3,7 +3,7 @@
  * deadline). A port of MMM-Countdown with several dates instead of one: the
  * nearest come first and past ones disappear on their own.
  */
-import { defineWidget, t } from '@tessera/sdk';
+import { defineWidget, t } from '@kiosko/sdk';
 import { clamp, dayOffset } from './util.ts';
 
 export interface CountdownEvent {

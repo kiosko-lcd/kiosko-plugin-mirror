@@ -3,7 +3,7 @@
  * built in code, where the panel is, network timeouts and number formats.
  */
 import { homedir } from 'node:os';
-import { t } from '@tessera/sdk';
+import { t } from '@kiosko/sdk';
 
 /** True for Spanish locales (`es`, `es-ES`, `es_MX`…). */
 export const isEs = (locale: string): boolean => /^es(?:$|[-_])/i.test(locale);
@@ -42,7 +42,7 @@ export const NO_PLACE = 'no coordinates: set your place in Settings, or latitude
 /** The widget's abort signal plus a timeout, for one network request. */
 export const within = (signal: AbortSignal, ms: number): AbortSignal => AbortSignal.any([signal, AbortSignal.timeout(ms)]);
 
-export const USER_AGENT = 'Tessera LCD panel (plugin mirror)';
+export const USER_AGENT = 'Kiosko LCD panel (plugin mirror)';
 
 /** `~/x` → `/home/me/x`. */
 export function expandHome(p: string): string {

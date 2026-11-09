@@ -1,24 +1,24 @@
-# tessera-plugin-mirror
+# kiosko-plugin-mirror
 
 MagicMirror²-style cards: countdown, compliments, today and tomorrow, now playing, on this day, air quality, earthquakes and rain radar.
 
-A plugin for [Tessera](https://github.com/Loksly/tessera), the widget mosaic for small USB LCD panels.
+A plugin for [Kiosko](https://github.com/kiosko-lcd/kiosko), the widget mosaic for small USB LCD panels.
 
 ![Countdown](docs/countdown.png)
 
 ## Install
 
-In Tessera, **Plugins → Install from npm** → `tessera-plugin-mirror`, then restart Tessera. Or from a terminal:
+In Kiosko, **Plugins → Install from npm** → `kiosko-plugin-mirror`, then restart Kiosko. Or from a terminal:
 
 ```sh
-npm install --prefix ~/.config/tessera/plugins tessera-plugin-mirror
+npm install --prefix ~/.config/kiosko/plugins kiosko-plugin-mirror
 ```
 
-(macOS: `~/Library/Application Support/Tessera/plugins`, Windows: `%APPDATA%\Tessera\plugins`.)
+(macOS: `~/Library/Application Support/Kiosko/plugins`, Windows: `%APPDATA%\Kiosko\plugins`.)
 
 ## Requirements
 
-- Location in Tessera → Settings for air quality, earthquakes and the rain radar. *Now playing* reads MPRIS (Linux).
+- Location in Kiosko → Settings for air quality, earthquakes and the rain radar. *Now playing* reads MPRIS (Linux).
 
 ## Widgets
 
@@ -129,14 +129,14 @@ Latest rain radar (RainViewer) over a dark OpenStreetMap map, home in the centre
 npm install
 npm test          # node:test
 npm run check     # TypeScript
-npm run build     # dist/index.js, what Tessera loads
+npm run build     # dist/index.js, what Kiosko loads
 ```
 
-To try it in a running Tessera without publishing: `tessera plugins link .` and restart Tessera.
+To try it in a running Kiosko without publishing: `kiosko plugins link .` and restart Kiosko.
 
-Working on Tessera and its plugins together: clone them side by side
-(`tessera/` and `tessera-plugins/tessera-plugin-mirror/`) and run `npm install` in
-`tessera/`; its workspaces link every plugin found in `../tessera-plugins`.
+Working on Kiosko and its plugins together: clone them side by side
+(`kiosko/` and `kiosko-plugins/kiosko-plugin-mirror/`) and run `npm install` in
+`kiosko/`; its workspaces link every plugin found in `../kiosko-plugins`.
 
 ## License
 

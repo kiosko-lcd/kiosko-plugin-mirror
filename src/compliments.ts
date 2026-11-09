@@ -3,7 +3,7 @@
  * with MagicMirror²: lists for the morning, the afternoon, the evening and
  * any time, and the phrase changes every `changeMs`.
  */
-import { defineWidget, t } from '@tessera/sdk';
+import { defineWidget, t } from '@kiosko/sdk';
 import { clamp, isEs } from './util.ts';
 
 export interface Phrases {

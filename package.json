@@ -1,13 +1,13 @@
 {
-  "name": "tessera-plugin-mirror",
+  "name": "kiosko-plugin-mirror",
   "version": "0.1.0",
   "description": "MagicMirror²-style cards: countdown, compliments, tasks, now playing, on this day, air quality, earthquakes and rain radar.",
   "type": "module",
   "license": "MIT",
   "author": "Loksly",
   "keywords": [
-    "tessera",
-    "tessera-plugin",
+    "kiosko",
+    "kiosko-plugin",
     "lcd",
     "widgets",
     "time",
@@ -16,13 +16,13 @@
     "media",
     "info"
   ],
-  "homepage": "https://github.com/Loksly/tessera-plugin-mirror#readme",
+  "homepage": "https://github.com/kiosko-lcd/kiosko-plugin-mirror#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Loksly/tessera-plugin-mirror.git"
+    "url": "git+https://github.com/kiosko-lcd/kiosko-plugin-mirror.git"
   },
   "bugs": {
-    "url": "https://github.com/Loksly/tessera-plugin-mirror/issues"
+    "url": "https://github.com/kiosko-lcd/kiosko-plugin-mirror/issues"
   },
   "exports": {
     ".": {
@@ -30,7 +30,7 @@
       "default": "./dist/index.js"
     }
   },
-  "tessera": {
+  "kiosko": {
     "plugin": "./dist/index.js",
     "id": "mirror"
   },
@@ -49,7 +49,7 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "@tessera/sdk": "^0.1.0",
+    "@kiosko/sdk": "^0.1.0",
     "@types/node": "^24.0.0",
     "esbuild": "^0.25.0",
     "typescript": "^5.9.3"

@@ -12,7 +12,7 @@
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { defineWidget, t, type Box, type Canvas, type Graphics, type RenderContext } from '@tessera/sdk';
+import { defineWidget, t, type Box, type Canvas, type Graphics, type RenderContext } from '@kiosko/sdk';
 import { clamp, hhmm, NO_PLACE, placeFields, placeFor, USER_AGENT, within } from './util.ts';
 
 /** Size of the composed map; it's drawn cropped to the card's box. */

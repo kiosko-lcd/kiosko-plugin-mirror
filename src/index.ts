@@ -3,7 +3,7 @@
  * countdown, phrases for the time of day, today's to-dos, what's playing,
  * on this day, air quality, earthquakes nearby and the rain radar.
  */
-import { definePlugin } from '@tessera/sdk';
+import { definePlugin } from '@kiosko/sdk';
 import { airquality } from './airquality.ts';
 import { compliments } from './compliments.ts';
 import { countdown } from './countdown.ts';
@@ -23,7 +23,7 @@ export default definePlugin({
     en: 'MagicMirror²-style cards: countdown, compliments, today and tomorrow, now playing, on this day, air quality, earthquakes and rain radar.',
     es: 'Tarjetas al estilo de MagicMirror²: cuenta atrás, frases, hoy y mañana, lo que suena, tal día como hoy, calidad del aire, terremotos y radar de lluvia.',
   },
-  author: 'Tessera',
+  author: 'Kiosko',
   license: 'MIT',
   icon: 'layout-grid',
   widgets: [countdown, compliments, tasks, nowplaying, onthisday, airquality, earthquakes, rainmap],

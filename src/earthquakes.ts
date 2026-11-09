@@ -8,7 +8,7 @@
  * the right, the latest ones with magnitude, where (the nearest town, from
  * OpenStreetMap) and when.
  */
-import { defineWidget, t } from '@tessera/sdk';
+import { defineWidget, t } from '@kiosko/sdk';
 import { clamp, fmt, isEs, NO_PLACE, placeFields, placeFor, USER_AGENT, within } from './util.ts';
 
 export interface Quake {

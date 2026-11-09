@@ -8,7 +8,7 @@ import { execFile } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { defineWidget, t, type Graphics, type Image, type Theme } from '@tessera/sdk';
+import { defineWidget, t, type Graphics, type Image, type Theme } from '@kiosko/sdk';
 import { clamp, within } from './util.ts';
 
 const execFileAsync = promisify(execFile);

@@ -13,7 +13,7 @@
 import { execFile } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
-import { defineWidget, t } from '@tessera/sdk';
+import { defineWidget, t } from '@kiosko/sdk';
 import { clamp, dayKey, expandHome } from './util.ts';
 
 const execFileAsync = promisify(execFile);

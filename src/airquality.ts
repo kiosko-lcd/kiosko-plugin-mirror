@@ -5,7 +5,7 @@
  * the Copernicus models, in Europe and in season only; its levels (low,
  * moderate, high) are a rough guide.
  */
-import { defineWidget, t, type Localized } from '@tessera/sdk';
+import { defineWidget, t, type Localized } from '@kiosko/sdk';
 import { clamp, fmt, isEs, NO_PLACE, placeFields, placeFor, within } from './util.ts';
 
 export const POLLEN = {

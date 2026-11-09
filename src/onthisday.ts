@@ -3,7 +3,7 @@
  * anniversaries" (its REST API, no key), in the user's language. One at a
  * time, changing every `changeMs`.
  */
-import { defineWidget, t } from '@tessera/sdk';
+import { defineWidget, t } from '@kiosko/sdk';
 import { clamp, isEs, USER_AGENT, within } from './util.ts';
 
 export interface Ephemeris {
