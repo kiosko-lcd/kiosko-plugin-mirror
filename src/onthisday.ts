@@ -3,8 +3,8 @@
  * anniversaries" (its REST API, no key), in the user's language. One at a
  * time, changing every `changeMs`.
  */
-import { defineWidget, t } from '@kiosko/sdk';
-import { clamp, isEs, USER_AGENT, within } from './util.ts';
+import { defineWidget, t, type Localized } from '@kiosko/sdk';
+import { clamp, USER_AGENT, within } from './util.ts';
 
 export interface Ephemeris {
   year: number;
@@ -34,9 +34,8 @@ export function wikiLang(option: string, locale: string): string {
 }
 
 /** "53 years ago" / "hace 53 años". */
-export function yearsAgo(n: number, locale: string): string {
-  if (isEs(locale)) return `hace ${n} ${n === 1 ? 'año' : 'años'}`;
-  return `${n} ${n === 1 ? 'year' : 'years'} ago`;
+export function yearsAgo(n: number, tr: (text: Localized) => string): string {
+  return n === 1 ? tr({ en: '1 year ago', es: 'hace 1 año' }) : tr({ en: `${n} years ago`, es: `hace ${n} años` });
 }
 
 const DEMO: Ephemeris[] = [
@@ -72,7 +71,7 @@ export const onthisday = defineWidget({
     return { day: `${mm}-${dd}`, items };
   },
   visible: ({ data }) => Boolean(data?.items.length),
-  render(g, { options, data, now, box, theme, kit, locale }) {
+  render(g, { options, data, now, box, theme, kit, t: tr }) {
     if (!data?.items.length) return;
     const { colors, fonts } = theme;
     const e = data.items[Math.floor(now / Math.max(60_000, options.changeMs)) % data.items.length]!;
@@ -81,7 +80,7 @@ export const onthisday = defineWidget({
     const ago = new Date(now).getFullYear() - e.year;
     if (ago > 0) {
       const s = Math.round(yearSize * 0.42);
-      kit.drawTracked(g, kit.truncate(g, yearsAgo(ago, locale), box.w - yw - s, { size: s, family: fonts.sans }), box.x + yw + s * 0.6, box.y + yearSize * 0.82, { size: s, family: fonts.sans, color: colors.inkDim });
+      kit.drawTracked(g, kit.truncate(g, yearsAgo(ago, tr), box.w - yw - s, { size: s, family: fonts.sans }), box.x + yw + s * 0.6, box.y + yearSize * 0.82, { size: s, family: fonts.sans, color: colors.inkDim });
     }
     const top = box.y + yearSize * 1.25;
     const room = box.y + box.h - top;

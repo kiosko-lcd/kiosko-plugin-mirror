@@ -1,26 +1,50 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { aqiCategory, parseAir, pollenLevel } from './airquality.ts';
+import { localize, defaultsOf, validate, DEFAULT_WORKDAY } from '@kiosko/sdk';
+import { airquality, aqiCategory, parseAir, pollenLevel } from './airquality.ts';
 import { phrasesFor, pick, poolFor } from './compliments.ts';
-import { daysUntil, upcoming } from './countdown.ts';
-import { ago, compass, distanceBearing, parseEmsc } from './earthquakes.ts';
+import { countdown, countdownLevel, daysUntil, upcoming } from './countdown.ts';
+import { compass, distanceBearing, earthquakes, parseEmsc } from './earthquakes.ts';
 import { choosePlayer, parsePlayer, positionAt } from './nowplaying.ts';
 import { cleanText, wikiLang, yearsAgo } from './onthisday.ts';
 import { isPng, tilesAround, wetFraction, worldPx } from './rainmap.ts';
-import { issuesByDay, parseTaskFile, sortTasks } from './tasks.ts';
-import { isEs, placeFor } from './util.ts';
+import { ISSUE_QUERIES, issuesByDay, mergeIssues, parseTaskFile, sortTasks, tasks } from './tasks.ts';
+import { compliments } from './compliments.ts';
+import { nowplaying } from './nowplaying.ts';
+import { rainmap } from './rainmap.ts';
 import plugin from './index.ts';
 
 const at = (iso: string) => new Date(iso).getTime();
+const es = (x: Parameters<typeof localize>[0]) => localize(x, 'es');
+const en = (x: Parameters<typeof localize>[0]) => localize(x, 'en');
 
 test('countdown: calendar days, today kept, past ones out, nearest first', () => {
   const now = at('2026-10-10T23:30:00');
   assert.equal(daysUntil('2026-10-10', now), 0);
   assert.equal(daysUntil('2026-10-11', now), 1, 'at 23:30, tomorrow is 1 even if it is half an hour away');
   assert.equal(daysUntil('not a date', now), null);
-  const list = upcoming([{ name: 'far', date: '2027-01-25' }, { name: 'past', date: '2026-10-01' }, { name: 'today', date: '2026-10-10' }, { name: 'bad', date: 'x' }], now, 4);
+  const list = upcoming([{ name: 'far', date: '2027-01-25' }, { name: 'past', date: '2026-10-01' }, { name: 'today', date: '2026-10-10' }, { name: 'bad', date: 'x' }], now);
   assert.deepEqual(list.map((e) => e.name), ['today', 'far']);
-  assert.equal(upcoming([{ name: 'a', date: '2026-10-11' }, { name: 'b', date: '2026-10-12' }], now, 1).length, 1);
+  assert.equal(upcoming([{ name: 'a', date: '2026-10-11' }, { name: 'b', date: '2026-10-12' }], now).length, 2, 'all of them: rows decide how many show');
+});
+
+test('countdown: yearly dates come back; thresholds in days; rows replace "max"', () => {
+  const now = at('2026-10-10T12:00:00');
+  assert.equal(daysUntil('1990-10-12', now, true), 2, 'a birthday two days ahead, whatever the year');
+  assert.equal(daysUntil('1990-10-10', now, true), 0, 'today it is today');
+  assert.equal(daysUntil('1990-10-09', now, true), 364, 'yesterday: next year');
+  assert.ok(daysUntil('1990-10-09', now)! < -13000, 'not yearly: long gone');
+  assert.equal(daysUntil('2024-02-29', at('2027-02-27T09:00:00'), true), 1, 'a leap day falls on the 28th');
+  assert.deepEqual(upcoming([{ name: 'gone', date: '2020-10-09' }, { name: 'bday', date: '2020-10-09', yearly: true }], now).map((e) => e.name), ['bday']);
+  const o = { warnDays: 7, alertDays: 1 };
+  assert.deepEqual([0, 1, 2, 7, 8].map((d) => countdownLevel(d, o)), ['alert', 'alert', 'warn', 'warn', 'normal']);
+  assert.equal(countdownLevel(1, { warnDays: 30, alertDays: 0 }), 'warn');
+  const d = defaultsOf(countdown.options!);
+  assert.deepEqual({ rows: d.rows, warnDays: d.warnDays, alertDays: d.alertDays }, { rows: 4, warnDays: 7, alertDays: 1 });
+  assert.equal('max' in d, false);
+  const state = (events: { name: string; date: string; yearly: boolean }[]) => ({ options: { ...d, events }, data: undefined, sources: {}, now, working: true, workday: DEFAULT_WORKDAY });
+  assert.equal(countdown.empty!(state([{ name: 'gone', date: '2020-01-01', yearly: false }])), true);
+  assert.equal(countdown.empty!(state([{ name: 'bday', date: '2020-01-01', yearly: true }])), false);
 });
 
 test('compliments: by time of day, stable for changeMs, built-in phrases when none are set', () => {
@@ -32,9 +56,11 @@ test('compliments: by time of day, stable for changeMs, built-in phrases when no
   assert.equal(pick(p, t, 30 * 60_000), pick(p, t + 60_000, 30 * 60_000), 'does not change on every repaint');
   assert.equal(pick({ ...p, morning: [], anytime: [] }, t, 60_000), null);
   const empty = { morning: [], afternoon: [], evening: [], anytime: [] };
-  assert.ok(phrasesFor(empty, 'es-ES').morning.includes('Buenos días.'));
-  assert.ok(phrasesFor(empty, 'en-GB').morning.includes('Good morning.'));
-  assert.equal(phrasesFor(p, 'es'), p);
+  assert.ok(phrasesFor(empty, (x) => localize(x, 'es-ES')).morning.includes('Buenos días.'));
+  assert.ok(phrasesFor(empty, (x) => localize(x, 'en-GB')).morning.includes('Good morning.'));
+  assert.ok(phrasesFor(empty, (x) => localize(x, 'de')).morning.includes('Good morning.'), 'any other language: English');
+  assert.equal(phrasesFor(p, es), p);
+  assert.deepEqual(compliments.options!.props.align.values, ['left', 'center', 'right']);
 });
 
 test('tasks: open boxes by section (English or Spanish) and by date; late ones go to today', () => {
@@ -45,8 +71,20 @@ test('tasks: open boxes by section (English or Spanish) and by date; late ones g
   const i = issuesByDay([{ title: 'x', due_date: '2026-10-09', references: { short: '#1' } }, { title: 'y', due_date: '2026-10-11' }, { title: 'z', due_date: null }], now);
   assert.deepEqual(i.today, [{ kind: 'issue', text: '#1 x', late: true }]);
   assert.deepEqual(i.tomorrow, [{ kind: 'issue', text: 'y' }]);
+  const merged = mergeIssues([[{ id: 1, title: 'old', due_date: '2026-08-01' }], [{ id: 1, title: 'old', due_date: '2026-08-01' }, { id: 2, title: 'y', due_date: '2026-10-11' }]]);
+  assert.deepEqual(merged.map((x) => x.id), [1, 2], 'each issue once');
+  assert.deepEqual(issuesByDay(merged, now).today, [{ kind: 'issue', text: 'old', late: true }], 'two months late still shows');
+  assert.ok(ISSUE_QUERIES.some((q) => q.includes('due_date=overdue')), 'every overdue issue is asked for, not only the last two weeks');
   const sorted = sortTasks([{ kind: 'task', text: 'r' }, { kind: 'task', text: 'l', late: true }, { kind: 'meeting', text: 'm2', time: '15:00' }, { kind: 'meeting', text: 'm1', time: '09:00' }]);
   assert.deepEqual(sorted.map((s) => s.text), ['m1', 'm2', 'l', 'r']);
+});
+
+test('tasks: options; empty when nothing is due in the days shown', () => {
+  const d = defaultsOf(tasks.options!);
+  assert.deepEqual({ includeIssues: d.includeIssues, showTomorrow: d.showTomorrow, rows: d.rows }, { includeIssues: false, showTomorrow: true, rows: 0 });
+  const state = (showTomorrow: boolean) => ({ options: { ...d, showTomorrow }, data: { today: [], tomorrow: [{ kind: 'task' as const, text: 'b' }] }, sources: {}, now: 0, working: true, workday: DEFAULT_WORKDAY });
+  assert.equal(tasks.empty!(state(true)), false);
+  assert.equal(tasks.empty!(state(false)), true, 'tomorrow hidden: nothing to show');
 });
 
 test('now playing: reads gdbus output (GVariant as text) and picks the player', () => {
@@ -66,6 +104,14 @@ test('now playing: reads gdbus output (GVariant as text) and picks the player', 
 test('air quality: European index bands and pollen levels', () => {
   assert.deepEqual([0, 20, 21, 55, 79, 100, 150].map((a) => aqiCategory(a).level), [0, 0, 1, 2, 3, 4, 5]);
   assert.deepEqual(aqiCategory(25).label, { en: 'Fair', es: 'Razonablemente buena' });
+  assert.deepEqual([40, 51, 120, 160, 250, 400].map((a) => aqiCategory(a, 'us').level), [0, 1, 2, 3, 4, 5]);
+  assert.equal(parseAir({ us_aqi: 87.4, european_aqi: 30 }, 'us').aqi, 87);
+  assert.equal(parseAir({ us_aqi: 87.4, european_aqi: 30 }).aqi, 30);
+  const o = defaultsOf(airquality.options!);
+  const visible = (onlyAbove: number, aqi: number) => airquality.visible!({ options: { ...o, onlyAbove }, data: { ...parseAir({ european_aqi: aqi }) }, sources: {}, now: 0, working: true, workday: DEFAULT_WORKDAY });
+  assert.equal(visible(0, 10), true, '0: always');
+  assert.equal(visible(40, 39), false);
+  assert.equal(visible(40, 40), true);
   assert.deepEqual([0.8, 30, 120].map(pollenLevel), ['low', 'moderate', 'high']);
   const d = parseAir({ european_aqi: 33.6, pm2_5: 7, pm10: null, olive_pollen: 12, grass_pollen: 0 });
   assert.equal(d.aqi, 34);
@@ -80,22 +126,19 @@ test('on this day: no reference to the front-page photo; language from the optio
   assert.equal(wikiLang('', 'es-ES'), 'es');
   assert.equal(wikiLang('de', 'es-ES'), 'de');
   assert.equal(wikiLang('', 'x'), 'en');
-  assert.equal(yearsAgo(1, 'es'), 'hace 1 año');
-  assert.equal(yearsAgo(53, 'en'), '53 years ago');
+  assert.equal(yearsAgo(1, es), 'hace 1 año');
+  assert.equal(yearsAgo(53, en), '53 years ago');
 });
 
 test('earthquakes: distance and bearing from home, EMSC newest first, localized words', () => {
   const home = { lat: 38.3452, lon: -0.4810 };
   const ab = distanceBearing(home, { lat: 38.4524, lon: -0.3053 });
   assert.ok(Math.abs(ab.km - 19.7) < 1, `km ${ab.km}`);
-  assert.equal(compass(ab.bearing), 'NE');
-  assert.equal(compass(359), 'N');
-  assert.equal(compass(225, 'es'), 'SO');
-  assert.equal(compass(225, 'en'), 'SW');
-  assert.equal(compass(270, 'es'), 'O');
-  assert.equal(ago(20 * 60_000, 'es'), 'hace 20 min');
-  assert.equal(ago(5 * 3_600_000, 'en'), '5 h ago');
-  assert.equal(ago(3 * 86_400_000, 'es'), 'hace 3 d');
+  assert.equal(compass(ab.bearing, en), 'NE');
+  assert.equal(compass(359, en), 'N');
+  assert.equal(compass(225, es), 'SO');
+  assert.equal(compass(225, en), 'SW');
+  assert.equal(compass(270, es), 'O');
   const q = parseEmsc({
     features: [
       { id: 'a', properties: { time: '2026-10-07T08:45:12.02Z', mag: 1.6, lat: 38.2003, lon: -2.3007, depth: 0 } },
@@ -104,7 +147,7 @@ test('earthquakes: distance and bearing from home, EMSC newest first, localized 
   }, home);
   assert.deepEqual(q.map((x) => x.id), ['b', 'a']);
   assert.equal(q[0]!.depth, 6.2);
-  assert.equal(compass(q[0]!.bearing, 'es'), 'SO');
+  assert.equal(compass(q[0]!.bearing, es), 'SO');
   assert.deepEqual(parseEmsc({}, home), []);
 });
 
@@ -120,12 +163,25 @@ test('rain radar: world pixels, the tiles that cover the box, wet fraction', () 
   assert.ok(!isPng(Buffer.from('<html>notice</html>')));
 });
 
-test('place: the card coordinates win over the user place; 0,0 means unset', () => {
-  const home = { latitude: 40.4, longitude: -3.7 };
-  assert.deepEqual(placeFor({ latitude: 0, longitude: 0 }, home), home);
-  assert.deepEqual(placeFor({ latitude: 1, longitude: 2 }, home), { latitude: 1, longitude: 2 });
-  assert.equal(placeFor({ latitude: 0, longitude: 0 }, undefined), null);
-  assert.ok(isEs('es') && isEs('es-MX') && isEs('es_ES') && !isEs('en') && !isEs('est'));
+test('earthquakes: shared list rows (4 by default) and an empty switch, hidden by default', () => {
+  const d = defaultsOf(earthquakes.options!);
+  assert.equal(d.rows, 4);
+  assert.equal(earthquakes.hideWhenEmpty, true);
+  const state = (data: unknown) => ({ options: d, data: data as never, sources: {}, now: 0, working: true, workday: DEFAULT_WORKDAY });
+  assert.equal(earthquakes.visible!(state(undefined)), false, 'nothing read yet');
+  assert.equal(earthquakes.empty!(state({ quakes: [], radiusKm: 150 })), true);
+  assert.equal(earthquakes.visible!(state({ quakes: [], radiusKm: 150 })), true, 'with a reading, hiding it is the switch\'s call');
+});
+
+test('place: the cards share latitude and longitude, 0,0 = Settings; booleans named show…', () => {
+  for (const w of [airquality, earthquakes, rainmap]) {
+    const o = validate(w.options!, {}).value as Record<string, unknown>;
+    assert.equal(o.latitude, 0, w.id);
+    assert.equal(o.longitude, 0, w.id);
+    assert.equal('placeName' in o, false, `${w.id} shows no place name`);
+  }
+  assert.equal(defaultsOf(airquality.options!).showPollen, true);
+  assert.equal(defaultsOf(nowplaying.options!).showCover, true);
 });
 
 test('plugin: every widget has an icon, a category, sizes and demo data', () => {

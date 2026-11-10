@@ -8,12 +8,12 @@
  *     that day is gone, to today marked as late. Ticked boxes (`- [x]`) are
  *     left out;
  *   - optionally, the GitLab issues assigned to you that are due today or
- *     tomorrow, and the overdue ones (through the `glab` CLI).
+ *     tomorrow, and every overdue one, however late (through the `glab` CLI).
  */
 import { execFile } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
-import { defineWidget, t } from '@kiosko/sdk';
+import { defineWidget, drawEmpty, drawMore, listLayout, listOptions, moreHeight, moreLabel, t, type Box, type Graphics, type RenderContext } from '@kiosko/sdk';
 import { clamp, dayKey, expandHome } from './util.ts';
 
 const execFileAsync = promisify(execFile);
@@ -64,8 +64,34 @@ export function parseTaskFile(text: string, now: number): TasksData {
   return out;
 }
 
+export interface GitlabIssue {
+  id?: number;
+  title: string;
+  due_date?: string | null;
+  web_url?: string;
+  references?: { short?: string; full?: string };
+}
+
+/**
+ * The two queries the issues come from: every overdue one (the window GitLab
+ * calls "next month and previous two weeks" loses those more than two weeks
+ * late, which are exactly the ones that mustn't hide) and the coming ones.
+ */
+export const ISSUE_QUERIES = ['overdue', 'next_month_and_previous_two_weeks'].map((due) => `issues?scope=assigned_to_me&state=opened&due_date=${due}&per_page=100`);
+
+/** Several pages of issues as one list, each issue once. */
+export function mergeIssues(lists: readonly GitlabIssue[][]): GitlabIssue[] {
+  const seen = new Set<string>();
+  return lists.flat().filter((i) => {
+    const key = String(i.id ?? i.web_url ?? i.references?.full ?? i.title);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 /** GitLab issues (REST shape) due today, tomorrow or already overdue. */
-export function issuesByDay(issues: { title: string; due_date?: string | null; references?: { short?: string } }[], now: number): TasksData {
+export function issuesByDay(issues: GitlabIssue[], now: number): TasksData {
   const today = dayKey(now), tomorrow = dayKey(now + 86_400_000);
   const out: TasksData = { today: [], tomorrow: [] };
   for (const i of issues) {
@@ -97,6 +123,67 @@ const DEMO: TasksData = {
   ],
 };
 
+interface Section {
+  title: string;
+  items: TaskItem[];
+}
+
+interface TaskPainter {
+  g: Graphics;
+  ctx: RenderContext<unknown, TasksData>;
+  rowH: number;
+}
+
+/**
+ * Paints a section in `rows` rows of `area` from its top: the title, then
+ * the items; when they don't fit, a compact "+N more" line takes the last
+ * row (with a single row for items, it goes after the one shown). Returns
+ * the height used.
+ */
+function drawSection(p: TaskPainter, s: Section, area: Box, rows: number): number {
+  const { g, ctx, rowH } = p;
+  const { kit, theme, t: tr } = ctx;
+  const { colors, fonts } = theme;
+  const size = Math.round(rowH * 0.76);
+  const small = Math.round(rowH * 0.62);
+  const baseOf = (i: number) => area.y + i * rowH + rowH / 2 + size * 0.36;
+  kit.drawTracked(g, kit.truncate(g, s.title, area.w, { size: small, family: fonts.sans }), area.x, area.y + rowH / 2 + small * 0.45, { size: small, family: fonts.sans, color: colors.inkDim, smallCaps: true, tracking: 1 });
+  const itemRows = Math.max(1, rows - 1);
+  if (!s.items.length) {
+    kit.drawTracked(g, tr({ en: 'Nothing', es: 'Nada' }), area.x, baseOf(1), { size, family: fonts.sans, color: colors.inkFaint });
+    return 2 * rowH;
+  }
+  const fits = s.items.length <= itemRows;
+  const shown = fits ? s.items : s.items.slice(0, Math.max(1, itemRows - 1));
+  const hidden = s.items.length - shown.length;
+  // With a single row for items, "+N more" goes at its end; otherwise in a compact line under them, like every list's.
+  const inline = hidden > 0 && shown.length >= itemRows;
+  const moreH = moreHeight(rowH);
+  const inlineW = inline ? kit.measureTracked(g, moreLabel(hidden, tr), { size: Math.max(8, Math.round(moreH * 0.62)), family: fonts.sans }) + small * 0.8 : 0;
+  shown.forEach((it, i) => {
+    const base = baseOf(i + 1);
+    let tx = area.x;
+    if (it.kind === 'meeting' && it.time) {
+      tx += kit.drawTracked(g, it.time, area.x, base, { size: small, family: fonts.mono, color: colors.info }) + small * 0.5;
+    } else {
+      tx += kit.drawTracked(g, it.kind === 'issue' ? '◆' : '•', area.x, base, { size: small, family: fonts.sans, color: it.late ? colors.alert : colors.inkDim }) + small * 0.5;
+    }
+    const o = { size, family: fonts.sans, color: it.late ? colors.alert : colors.ink };
+    const last = i === shown.length - 1;
+    kit.drawTracked(g, kit.truncate(g, it.text, area.x + area.w - tx - (last ? inlineW : 0), o), tx, base, o);
+  });
+  const indent = kit.measureTracked(g, '•', { size: small, family: fonts.sans }) + small * 0.5;
+  if (inline) {
+    drawMore(g, ctx, { hidden, more: { x: area.x, y: area.y + shown.length * rowH + (rowH - moreH) / 2, w: area.w, h: moreH } }, { align: 'right' });
+    return (1 + shown.length) * rowH;
+  }
+  if (hidden) {
+    drawMore(g, ctx, { hidden, more: { x: area.x, y: area.y + (1 + shown.length) * rowH, w: area.w, h: moreH } }, { indent });
+    return (1 + shown.length) * rowH + moreH;
+  }
+  return (1 + shown.length) * rowH;
+}
+
 export const tasks = defineWidget({
   id: 'tasks',
   name: { en: 'Today and tomorrow', es: 'Hoy y mañana' },
@@ -119,8 +206,10 @@ export const tasks = defineWidget({
         es: 'Markdown con casillas «- [ ] …» bajo «## Hoy» y «## Mañana»; «@2026-10-14» le pone fecha.',
       },
     }),
-    gitlab: t.boolean({ label: { en: 'Add my GitLab issues with a due date', es: 'Añadir mis issues de GitLab con fecha' } }),
+    includeIssues: t.boolean({ label: { en: 'Add my GitLab issues with a due date', es: 'Añadir mis issues de GitLab con fecha' }, help: { en: 'Due today or tomorrow, and every overdue one.', es: 'Las que vencen hoy o mañana, y todas las vencidas.' } }),
     bin: t.string({ default: 'glab', format: 'path', risk: 'exec', advanced: true, label: { en: 'glab command', es: 'Comando glab' }, help: { en: 'The GitLab CLI, already logged in.', es: 'El CLI de GitLab, con la sesión iniciada.' } }),
+    showTomorrow: t.boolean({ default: true, label: { en: 'Tomorrow too', es: 'También mañana' }, help: { en: 'Off: only today, for small tiles.', es: 'Apagado: sólo hoy, para teselas pequeñas.' } }),
+    ...listOptions(),
   }),
   intervalMs: 10 * 60_000,
   async fetch({ options, now, log, signal }): Promise<TasksData> {
@@ -136,92 +225,66 @@ export const tasks = defineWidget({
         // No file, no tasks of your own.
       }
     }
-    if (options.gitlab) {
-      try {
-        const { stdout } = await execFileAsync(options.bin || 'glab', ['api', 'issues?scope=assigned_to_me&state=opened&due_date=next_month_and_previous_two_weeks&per_page=100'], { timeout: 20_000, maxBuffer: 8_000_000, signal });
-        add(issuesByDay(JSON.parse(stdout), now));
-      } catch (err) {
-        log(`no GitLab issues: ${err instanceof Error ? err.message.split('\n')[0] : String(err)}`);
-      }
+    if (options.includeIssues) {
+      const pages = await Promise.allSettled(
+        ISSUE_QUERIES.map(async (q) => JSON.parse((await execFileAsync(options.bin || 'glab', ['api', q], { timeout: 20_000, maxBuffer: 8_000_000, signal })).stdout) as GitlabIssue[]),
+      );
+      const failed = pages.find((r): r is PromiseRejectedResult => r.status === 'rejected');
+      if (failed) log(`no GitLab issues: ${failed.reason instanceof Error ? failed.reason.message.split('\n')[0] : String(failed.reason)}`);
+      add(issuesByDay(mergeIssues(pages.flatMap((r) => (r.status === 'fulfilled' && Array.isArray(r.value) ? [r.value] : []))), now));
     }
     return { today: sortTasks(data.today), tomorrow: sortTasks(data.tomorrow) };
   },
-  render(g, { data, box, theme, kit, t: tr }) {
+  empty: ({ data, options }) => !!data && !data.today.length && !(options.showTomorrow && data.tomorrow.length),
+  render(g, ctx) {
+    const { data, box, options, t: tr } = ctx;
     if (!data) return;
-    const { colors, fonts } = theme;
+    const today = { title: tr({ en: 'Today', es: 'Hoy' }), items: data.today };
+    const tomorrow = { title: tr({ en: 'Tomorrow', es: 'Mañana' }), items: data.tomorrow };
+    const sections = options.showTomorrow ? [today, tomorrow] : [today];
+    if (!sections.some((s) => s.items.length)) return drawEmpty(g, ctx, options.showTomorrow ? tr({ en: 'Nothing for today or tomorrow', es: 'Nada para hoy ni mañana' }) : tr({ en: 'Nothing for today', es: 'Nada para hoy' }));
     // Wide and short tiles get today and tomorrow side by side; otherwise
     // today on top and tomorrow below, full width (in two narrow columns the
     // texts were left with a dozen letters).
-    const columns = box.w >= 520 && box.w >= box.h * 2.4;
-    // Rows as tall as the lists allow, within readable limits.
-    const nT = Math.max(1, data.today.length), nM = Math.max(1, data.tomorrow.length);
-    const fit = columns ? box.h / (Math.max(nT, nM) + 0.86) : box.h / (nT + nM + 1.87);
-    const rowH = clamp(fit, 20, Math.min(40, box.w / 9));
-    const size = Math.round(rowH * 0.76);
-    const small = Math.round(rowH * 0.62);
-    const headH = Math.round(rowH * 0.86);
-    const label = (title: string, x: number, top: number) =>
-      kit.drawTracked(g, title, x, top + headH * 0.72, { size: small, family: fonts.sans, color: colors.inkDim, smallCaps: true, tracking: 1 });
-    /** Paints a list in `rows` rows from `top`; returns where it ended. */
-    const section = (title: string, items: TaskItem[], x: number, w: number, top: number, rows: number) => {
-      label(title, x, top);
-      const at = (i: number) => top + headH + i * rowH + rowH * 0.72;
-      if (!items.length) {
-        kit.drawTracked(g, tr({ en: 'Nothing', es: 'Nada' }), x, at(0), { size, family: fonts.sans, color: colors.inkFaint });
-        return top + headH + rowH;
-      }
-      // When something doesn't fit, the last row says how many are left;
-      // with a single row, that count goes at its end instead.
-      const shown = items.length <= rows ? items : items.slice(0, Math.max(1, rows - 1));
-      const hidden = items.length - shown.length;
-      const tail = hidden && shown.length >= rows ? `+${hidden}` : '';
-      const tailW = tail ? kit.measureTracked(g, tail, { size: small, family: fonts.sans }) + small * 0.5 : 0;
-      shown.forEach((it, i) => {
-        const base = at(i);
-        let tx = x;
-        if (it.kind === 'meeting' && it.time) {
-          tx += kit.drawTracked(g, it.time, x, base, { size: small, family: fonts.mono, color: colors.info }) + small * 0.5;
-        } else {
-          tx += kit.drawTracked(g, it.kind === 'issue' ? '◆' : '•', x, base, { size: small, family: fonts.sans, color: it.late ? colors.alert : colors.inkDim }) + small * 0.5;
-        }
-        const o = { size, family: fonts.sans, color: it.late ? colors.alert : colors.ink };
-        const last = i === shown.length - 1;
-        kit.drawTracked(g, kit.truncate(g, it.text, x + w - tx - (last ? tailW : 0), o), tx, base, o);
-        if (last && tail) kit.drawTracked(g, tail, x + w, base, { size: small, family: fonts.sans, color: colors.inkDim, align: 'right' });
-      });
-      let used = shown.length;
-      if (hidden && !tail) {
-        kit.drawTracked(g, `+${items.length - shown.length} ${tr({ en: 'more', es: 'más' })}`, x, at(used), { size: small, family: fonts.sans, color: colors.inkDim });
-        used++;
-      }
-      return top + headH + used * rowH;
-    };
-    const today = tr({ en: 'Today', es: 'Hoy' }), tomorrow = tr({ en: 'Tomorrow', es: 'Mañana' });
+    const columns = sections.length === 2 && box.w >= 520 && box.w >= box.h * 2.4;
+    const gap = columns ? Math.round(clamp(box.w * 0.03, 12, 40)) : 0;
+    const colW = columns ? (box.w - gap) / 2 : box.w;
+    // A section is its title and its items (or "Nothing"), a row each; rows follow the shared list options.
+    const linesOf = (s: Section) => 1 + Math.max(1, s.items.length);
+    const count = columns ? Math.max(...sections.map(linesOf)) : sections.reduce((a, s) => a + linesOf(s), 0);
+    const plan = listLayout(box, count, options, { sizes: { 'one-line': { min: 20, max: clamp(colW / 9, 20, 40) } } });
+    const rowH = plan.rowH;
+    // Row slots: those that fit, or `rows` of them.
+    const fit = Math.max(1, Math.floor(box.h / rowH + 0.1));
+    const slots = options.rows > 0 ? Math.min(options.rows, fit) : fit;
+    const p: TaskPainter = { g, ctx, rowH };
     if (columns) {
-      const gap = rowH;
-      const cw = (box.w - gap) / 2;
-      const rows = Math.max(1, Math.floor((box.h - headH) / rowH + 0.1));
-      section(today, data.today, box.x, cw, box.y, rows);
-      section(tomorrow, data.tomorrow, box.x + cw + gap, cw, box.y, rows);
+      sections.forEach((s, i) => drawSection(p, s, { x: box.x + i * (colW + gap), y: box.y, w: colW, h: box.h }, slots));
       return;
     }
-    const total = Math.floor((box.h - 2 * headH) / rowH + 0.1);
-    if (total < 3) {
+    if (sections.length === 1) return void drawSection(p, today, box, slots);
+    const need = sections.map(linesOf);
+    if (need[0]! + need[1]! <= slots) {
+      const used = drawSection(p, today, box, need[0]!);
+      drawSection(p, tomorrow, { ...box, y: box.y + used }, need[1]!);
+      return;
+    }
+    if (slots < 5) {
       // Too short for both lists: today, and tomorrow as a one-line count.
-      const rows = Math.max(1, Math.floor((box.h - headH) / rowH + 0.1) - (data.tomorrow.length ? 1 : 0));
-      const end = section(today, data.today, box.x, box.w, box.y, rows);
-      if (data.tomorrow.length) {
-        const s = `${tomorrow}: ${data.tomorrow.length}`;
-        kit.drawTracked(g, kit.truncate(g, s, box.w, { size: small, family: fonts.sans }), box.x, end + rowH * 0.72, { size: small, family: fonts.sans, color: colors.inkDim });
+      const rows = Math.max(2, slots - (tomorrow.items.length ? 1 : 0));
+      const used = drawSection(p, today, box, rows);
+      if (tomorrow.items.length && rows < slots && used + rowH <= box.h + rowH * 0.1) {
+        const small = Math.round(rowH * 0.62);
+        const font = { size: small, family: ctx.theme.fonts.sans };
+        ctx.kit.drawTracked(g, ctx.kit.truncate(g, `${tomorrow.title}: ${tomorrow.items.length}`, box.w, font), box.x, box.y + used + rowH / 2 + small * 0.36, { ...font, color: ctx.theme.colors.inkDim });
       }
       return;
     }
-    // Today takes the room it needs, leaving tomorrow two rows (one when tight).
-    const keep = Math.min(total >= 6 ? 2 : 1, data.tomorrow.length || 1);
-    const todayRows = Math.max(1, Math.min(data.today.length || 1, total - keep));
-    const next = section(today, data.today, box.x, box.w, box.y, todayRows);
-    const left = Math.floor((box.y + box.h - next - rowH * 0.15 - headH) / rowH + 0.1);
-    if (left >= 1) section(tomorrow, data.tomorrow, box.x, box.w, next + rowH * 0.15, left);
+    // Today takes the room it needs, leaving tomorrow its title and two rows (one when tight).
+    const keep = 1 + Math.min(slots >= 8 ? 2 : 1, Math.max(1, tomorrow.items.length));
+    const todayRows = Math.min(need[0]!, slots - keep);
+    const used = drawSection(p, today, box, todayRows);
+    drawSection(p, tomorrow, { ...box, y: box.y + used }, Math.min(need[1]!, slots - todayRows));
   },
   demo: () => ({ data: DEMO }),
 });

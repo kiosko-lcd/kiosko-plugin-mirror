@@ -3,8 +3,8 @@
  * with MagicMirror²: lists for the morning, the afternoon, the evening and
  * any time, and the phrase changes every `changeMs`.
  */
-import { defineWidget, t } from '@kiosko/sdk';
-import { clamp, isEs } from './util.ts';
+import { defineWidget, t, type Localized } from '@kiosko/sdk';
+import { clamp } from './util.ts';
 
 export interface Phrases {
   morning: string[];
@@ -29,10 +29,10 @@ export const BUILTIN_PHRASES: Record<'en' | 'es', Phrases> = {
   },
 };
 
-/** The user's lists, or the built-in ones in their language when they wrote none. */
-export function phrasesFor(p: Phrases, locale: string): Phrases {
+/** The user's lists, or the built-in ones in their language (English for any other) when they wrote none. */
+export function phrasesFor(p: Phrases, tr: (text: Localized) => string): Phrases {
   const own = p.morning.length + p.afternoon.length + p.evening.length + p.anytime.length > 0;
-  return own ? p : BUILTIN_PHRASES[isEs(locale) ? 'es' : 'en'];
+  return own ? p : BUILTIN_PHRASES[tr({ en: 'en', es: 'es' }) === 'es' ? 'es' : 'en'];
 }
 
 /** The phrases for this hour: morning from 3 to 12, afternoon from 12 to 17, evening the rest. */
@@ -66,11 +66,11 @@ export const compliments = defineWidget({
     anytime: listField('Any time', 'A cualquier hora'),
     changeMs: t.duration({ default: 30 * 60_000, min: 60_000, label: { en: 'Change every', es: 'Cambia cada' } }),
     maxSize: t.integer({ default: 56, min: 16, max: 200, unit: 'px', slider: true, label: { en: 'Largest letter size', es: 'Tamaño máximo de letra' } }),
-    align: t.enum(['left', 'center'] as const, { label: { en: 'Alignment', es: 'Alineación' }, labels: { left: { en: 'Left', es: 'Izquierda' }, center: { en: 'Centre', es: 'Centro' } } }),
+    align: t.enum(['left', 'center', 'right'] as const, { label: { en: 'Alignment', es: 'Alineación' }, labels: { left: { en: 'Left', es: 'Izquierda' }, center: { en: 'Centre', es: 'Centro' }, right: { en: 'Right', es: 'Derecha' } } }),
   }),
   redraw: 'minute',
-  render(g, { box, options, now, theme, kit, locale }) {
-    const text = pick(phrasesFor(options, locale), now, options.changeMs);
+  render(g, { box, options, now, theme, kit, t: tr }) {
+    const text = pick(phrasesFor(options, tr), now, options.changeMs);
     if (!text) return;
     const family = theme.fonts.sans;
     // The largest size at which it fits in up to four lines without an ellipsis.
@@ -83,7 +83,7 @@ export const compliments = defineWidget({
     }
     const lh = size * 1.2;
     const top = box.y + (box.h - lines.length * lh) / 2 + size * 0.85;
-    const x = options.align === 'center' ? box.x + box.w / 2 : box.x;
+    const x = options.align === 'center' ? box.x + box.w / 2 : options.align === 'right' ? box.x + box.w : box.x;
     lines.forEach((l, i) => kit.drawTracked(g, l, x, top + i * lh, { size, family, color: theme.colors.ink, align: options.align }));
   },
   // Needs no data: the built-in phrases are its sample.

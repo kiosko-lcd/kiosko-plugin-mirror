@@ -128,7 +128,7 @@ export const nowplaying = defineWidget({
   options: t.object({
     showPaused: t.boolean({ label: { en: 'Also while paused', es: 'También en pausa' } }),
     prefer: t.string({ placeholder: 'spotify', label: { en: 'Preferred player', es: 'Reproductor preferido' }, help: { en: 'Part of its MPRIS name; empty = whichever plays.', es: 'Parte de su nombre MPRIS; vacío = el que suene.' } }),
-    cover: t.boolean({ default: true, label: { en: 'Show the cover', es: 'Mostrar la portada' } }),
+    showCover: t.boolean({ default: true, label: { en: 'Show the cover', es: 'Mostrar la portada' } }),
   }),
   // Progress is extrapolated in render; what takes a poll to show is a new
   // song or player. Each poll is several `gdbus` calls.
@@ -148,7 +148,7 @@ export const nowplaying = defineWidget({
     }
     const best = choosePlayer(found, options.prefer);
     if (!best) return null;
-    const art = options.cover ? await readCover(best.artUrl, (b) => canvas.loadImage(b), signal) : undefined;
+    const art = options.showCover ? await readCover(best.artUrl, (b) => canvas.loadImage(b), signal) : undefined;
     return art ? { ...best, art } : best;
   },
   visible: ({ options, data }) => Boolean(data && (data.status === 'Playing' || (options.showPaused && data.status === 'Paused'))),
@@ -158,7 +158,7 @@ export const nowplaying = defineWidget({
     // Tall tiles: cover on top, text below. Otherwise cover on the left.
     const tall = box.h >= box.w * 0.85;
     let x = box.x, w = box.w, top = box.y;
-    if (options.cover) {
+    if (options.showCover) {
       const side = tall ? Math.min(box.w, box.h * 0.5) : Math.min(box.h, 300, box.w * 0.4);
       if (side >= 48) {
         const ax = tall ? box.x + (box.w - side) / 2 : box.x, ay = tall ? box.y : box.y + (box.h - side) / 2;

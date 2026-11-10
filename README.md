@@ -24,14 +24,16 @@ npm install --prefix ~/.config/kiosko/plugins kiosko-plugin-mirror
 
 ### Countdown — `mirror/countdown`
 
-Days left until your important dates, nearest first.
+Days left until your important dates, nearest first. Birthdays and anniversaries come back every year.
 
 ![Countdown](docs/countdown.png)
 
 | Option | Type | Default | |
 |---|---|---|---|
-| `events` | list | `[]` | Dates. Past dates hide themselves. |
-| `max` | number | `4` | How many to show |
+| `events` | list | `[]` | Dates. Past dates hide themselves; yearly ones come back. |
+| `rows` | number | `4` | Rows. 0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in "+N more". |
+| `warnDays` | number | `7` | Amber from (days before) |
+| `alertDays` | number | `1` | Red from (days before). 0: only on the day. |
 
 ### Compliments — `mirror/compliments`
 
@@ -47,7 +49,7 @@ A phrase that suits the time of day, like the MagicMirror² classic.
 | `anytime` | list | `[]` | Any time. Leave every list empty to use the built-in phrases, in your language. |
 | `changeMs` | duration (ms) | `1800000` | Change every |
 | `maxSize` | number | `56` | Largest letter size |
-| `align` | `left` \| `center` | `"left"` | Alignment |
+| `align` | `left` \| `center` \| `right` | `"left"` | Alignment |
 
 ### Today and tomorrow — `mirror/tasks`
 
@@ -58,8 +60,10 @@ Your to-dos for today and tomorrow, from a Markdown checklist and, optionally, y
 | Option | Type | Default | |
 |---|---|---|---|
 | `file` | string | `"~/tasks.md"` | Checklist file. Markdown with "- [ ] …" boxes under "## Today" and "## Tomorrow"; "@2026-10-14" dates a box. |
-| `gitlab` | boolean | `false` | Add my GitLab issues with a due date |
+| `includeIssues` | boolean | `false` | Add my GitLab issues with a due date. Due today or tomorrow, and every overdue one. |
 | `bin` | string | `"glab"` | glab command. The GitLab CLI, already logged in. |
+| `showTomorrow` | boolean | `true` | Tomorrow too. Off: only today, for small tiles. |
+| `rows` | number | `0` | Rows. 0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in "+N more". |
 
 ### Now playing — `mirror/nowplaying`
 
@@ -71,7 +75,7 @@ The song playing on this computer (any MPRIS player on Linux: Spotify, browser, 
 |---|---|---|---|
 | `showPaused` | boolean | `false` | Also while paused |
 | `prefer` | string | `""` | Preferred player. Part of its MPRIS name; empty = whichever plays. |
-| `cover` | boolean | `true` | Show the cover |
+| `showCover` | boolean | `true` | Show the cover |
 
 ### On this day — `mirror/onthisday`
 
@@ -86,19 +90,21 @@ Selected anniversaries of today from Wikipedia, one at a time.
 
 ### Air quality — `mirror/airquality`
 
-European air quality index, particles, gases and pollen where you are (Open-Meteo).
+Air quality index (European or US), particles, gases and pollen where you are (Open-Meteo).
 
 ![Air quality](docs/airquality.png)
 
 | Option | Type | Default | |
 |---|---|---|---|
-| `pollen` | boolean | `true` | Show pollen |
-| `latitude` | number | `0` | Latitude. Leave latitude and longitude at 0 to use the place set in Settings. |
+| `index` | `european` \| `us` | `"european"` | Index |
+| `onlyAbove` | number | `0` | Only from index. 0: always. Otherwise it takes its turn only when the index reaches this, on its own scale (European: 40 is moderate, 60 poor; US: 100 is unhealthy for sensitive groups). |
+| `showPollen` | boolean | `true` | Show pollen |
+| `latitude` | number | `0` | Latitude. Leave latitude and longitude at 0 to use the place in Settings. |
 | `longitude` | number | `0` | Longitude |
 
 ### Earthquakes nearby — `mirror/earthquakes`
 
-Recent earthquakes around you (EMSC) on a polar map, with magnitude, place and time. Hidden when there are none.
+Recent earthquakes around you (EMSC) on a polar map, with magnitude, place and time. Hidden when there are none (you can change that).
 
 ![Earthquakes nearby](docs/earthquakes.png)
 
@@ -107,8 +113,8 @@ Recent earthquakes around you (EMSC) on a polar map, with magnitude, place and t
 | `radiusKm` | number | `150` | Radius |
 | `days` | number | `30` | Days back |
 | `minMagnitude` | number | `1.5` | Minimum magnitude |
-| `rows` | number | `4` | Rows in the list |
-| `latitude` | number | `0` | Latitude. Leave latitude and longitude at 0 to use the place set in Settings. |
+| `rows` | number | `4` | Rows. 0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in "+N more". |
+| `latitude` | number | `0` | Latitude. Leave latitude and longitude at 0 to use the place in Settings. |
 | `longitude` | number | `0` | Longitude |
 
 ### Rain radar — `mirror/rainmap`
@@ -120,7 +126,7 @@ Latest rain radar (RainViewer) over a dark OpenStreetMap map, home in the centre
 | Option | Type | Default | |
 |---|---|---|---|
 | `onlyWhenRaining` | boolean | `true` | Only while it rains nearby |
-| `latitude` | number | `0` | Latitude. Leave latitude and longitude at 0 to use the place set in Settings. |
+| `latitude` | number | `0` | Latitude. Leave latitude and longitude at 0 to use the place in Settings. |
 | `longitude` | number | `0` | Longitude |
 
 ## Development

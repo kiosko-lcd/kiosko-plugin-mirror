@@ -8,8 +8,8 @@
  * the right, the latest ones with magnitude, where (the nearest town, from
  * OpenStreetMap) and when.
  */
-import { defineWidget, t } from '@kiosko/sdk';
-import { clamp, fmt, isEs, NO_PLACE, placeFields, placeFor, USER_AGENT, within } from './util.ts';
+import { defineWidget, drawEmpty, listLayout, listOptions, moreLabel, placeOf, t, type Localized } from '@kiosko/sdk';
+import { clamp, fmt, NO_PLACE, placeOptions, USER_AGENT, within } from './util.ts';
 
 export interface Quake {
   id: string;
@@ -41,19 +41,20 @@ export function distanceBearing(a: { lat: number; lon: number }, b: { lat: numbe
   return { km, bearing: ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360 };
 }
 
-/** "N", "NE", "SW"… (Spanish uses O for west: "SO", "NO"). */
-export function compass(bearing: number, locale = 'en'): string {
-  const es = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
-  const en = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-  return (isEs(locale) ? es : en)[Math.round(bearing / 45) % 8]!;
-}
+const POINTS: Localized[] = [
+  'N',
+  'NE',
+  'E',
+  'SE',
+  'S',
+  { en: 'SW', es: 'SO' },
+  { en: 'W', es: 'O' },
+  { en: 'NW', es: 'NO' },
+];
 
-/** "20 min ago", "5 h ago", "3 d ago" (or "hace 20 min"…). */
-export function ago(ms: number, locale = 'en'): string {
-  const min = Math.max(0, Math.round(ms / 60_000));
-  const h = Math.round(min / 60);
-  const v = min < 60 ? `${min} min` : h < 48 ? `${h} h` : `${Math.round(h / 24)} d`;
-  return isEs(locale) ? `hace ${v}` : `${v} ago`;
+/** "N", "NE", "SW"… (Spanish uses O for west: "SO", "NO"). */
+export function compass(bearing: number, tr: (text: Localized) => string): string {
+  return tr(POINTS[Math.round(bearing / 45) % 8]!);
 }
 
 interface EmscFeature {
@@ -75,7 +76,7 @@ export function parseEmsc(json: { features?: EmscFeature[] }, home: { lat: numbe
 /** Names already looked up, by rounded coordinates (Nominatim asks for at most one query per second). */
 const names = new Map<string, string | null>();
 
-async function placeName(lat: number, lon: number, locale: string, signal: AbortSignal): Promise<string | null> {
+async function placeName(lat: number, lon: number, locale: string, tr: (text: Localized) => string, signal: AbortSignal): Promise<string | null> {
   const lang = locale.split(/[-_]/)[0] || 'en';
   const key = `${lang}:${lat.toFixed(2)},${lon.toFixed(2)}`;
   if (names.has(key)) return names.get(key)!;
@@ -88,7 +89,7 @@ async function placeName(lat: number, lon: number, locale: string, signal: Abort
     if (!res.ok) return null; // Not cached: retried on the next round.
     const j = (await res.json()) as { name?: string; error?: string; address?: Record<string, string> };
     const a = j.address ?? {};
-    const name = j.error ? (isEs(locale) ? 'en el mar' : 'at sea') : (a.village ?? a.town ?? a.city ?? a.municipality ?? j.name ?? null);
+    const name = j.error ? tr({ en: 'at sea', es: 'en el mar' }) : (a.village ?? a.town ?? a.city ?? a.municipality ?? j.name ?? null);
     if (names.size > 500) names.clear();
     names.set(key, name);
     return name;
@@ -106,8 +107,8 @@ export const earthquakes = defineWidget({
   id: 'earthquakes',
   name: { en: 'Earthquakes nearby', es: 'Terremotos cercanos' },
   description: {
-    en: 'Recent earthquakes around you (EMSC) on a polar map, with magnitude, place and time. Hidden when there are none.',
-    es: 'Los terremotos recientes a tu alrededor (EMSC) en un mapa polar, con magnitud, lugar y hora. Se oculta si no hay ninguno.',
+    en: 'Recent earthquakes around you (EMSC) on a polar map, with magnitude, place and time. Hidden when there are none (you can change that).',
+    es: 'Los terremotos recientes a tu alrededor (EMSC) en un mapa polar, con magnitud, lugar y hora. Se oculta si no hay ninguno (se puede cambiar).',
   },
   icon: 'activity',
   category: 'info',
@@ -117,13 +118,13 @@ export const earthquakes = defineWidget({
     radiusKm: t.integer({ default: 150, min: 20, max: 2000, step: 10, unit: 'km', label: { en: 'Radius', es: 'Radio' } }),
     days: t.integer({ default: 30, min: 1, max: 365, unit: 'd', label: { en: 'Days back', es: 'Días hacia atrás' } }),
     minMagnitude: t.number({ default: 1.5, min: 0, max: 9, step: 0.1, label: { en: 'Minimum magnitude', es: 'Magnitud mínima' } }),
-    rows: t.integer({ default: 4, min: 1, max: 8, label: { en: 'Rows in the list', es: 'Filas de la lista' } }),
-    ...placeFields(),
+    ...listOptions({ rows: 4 }),
+    ...placeOptions(),
   }),
   intervalMs: 15 * 60_000,
   redraw: 'minute',
-  async fetch({ options, now, location, locale, signal }): Promise<QuakesData> {
-    const at = placeFor(options, location);
+  async fetch({ options, now, location, locale, signal, t: tr }): Promise<QuakesData> {
+    const at = placeOf(options, location);
     if (!at) throw new Error(NO_PLACE);
     const home = { lat: at.latitude, lon: at.longitude };
     const start = new Date(now - options.days * 86_400_000).toISOString().slice(0, 19);
@@ -133,12 +134,18 @@ export const earthquakes = defineWidget({
     if (res.status === 204) return { quakes: [], radiusKm: options.radiusKm };
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const quakes = parseEmsc((await res.json()) as { features?: EmscFeature[] }, home);
-    for (const q of quakes.slice(0, options.rows)) q.place = await placeName(q.lat, q.lon, locale, signal);
+    // Place names for the rows a list can show: Nominatim allows one lookup a second, so 12 at most (8 when rows fit the tile).
+    for (const q of quakes.slice(0, Math.min(12, options.rows || 8))) q.place = await placeName(q.lat, q.lon, locale, tr, signal);
     return { quakes, radiusKm: options.radiusKm };
   },
-  visible: ({ data }) => Boolean(data?.quakes.length),
-  render(g, { options, data, now, box, theme, kit, locale, t: tr }) {
-    if (!data?.quakes.length) return;
+  // Before the first reading there is nothing to say; with one and no quakes, it's the user's switch.
+  visible: ({ data }) => Boolean(data),
+  empty: ({ data }) => !data?.quakes.length,
+  hideWhenEmpty: true,
+  render(g, ctx) {
+    const { options, data, now, box, theme, kit, locale, t: tr, fmt: f } = ctx;
+    if (!data) return;
+    if (!data.quakes.length) return drawEmpty(g, ctx, tr({ en: `No earthquakes in ${options.days} d`, es: `Sin terremotos en ${options.days} d` }));
     const { colors, fonts } = theme;
     const { quakes, radiusKm } = data;
     const maxAge = options.days * 86_400_000;
@@ -191,32 +198,32 @@ export const earthquakes = defineWidget({
       g.fillRect(cx - 3, cy - 3, 6, 6);
     }
 
-    // List: the latest, with magnitude, place, distance and when.
-    const more = quakes.length > options.rows;
-    const footer = more ? Math.round(clamp(list.h * 0.09, 11, 22)) : 0;
-    const avail = list.h - footer * 1.4;
-    const rows = Math.max(1, Math.min(options.rows, Math.floor(avail / 30)));
-    const rowH = Math.min(72, avail / rows);
+    // List: the latest, with magnitude, place, distance and when; what doesn't fit, summed up in the last line.
+    const plan = listLayout(list, quakes.length, options, { sizes: { detailed: { min: 30, max: 72 } }, moreH: Math.round(clamp(list.h * 0.12, 16, 30)) });
+    const rowH = plan.rowH;
     const ms = Math.round(Math.min(rowH * 0.55, 40)), ps = Math.round(Math.min(rowH * 0.4, 28)), meta = Math.round(clamp(rowH * 0.28, 10, 20));
     const magW = kit.measureTracked(g, mag(8.8), { size: ms, family: fonts.sansBold });
-    const shown = quakes.slice(0, rows);
+    const shown = quakes.slice(0, plan.shown);
     shown.forEach((q, i) => {
-      const y = list.y + i * rowH + rowH * 0.62;
+      const y = plan.rows[i]!.y + rowH * 0.62;
       const col = magColor(q.mag, colors);
       kit.drawTracked(g, mag(q.mag), list.x, y, { size: ms, family: fonts.sansBold, color: col === colors.inkDim ? colors.ink : col });
       const tx = list.x + magW + ms * 0.3;
       const tw = list.x + list.w - tx;
-      const distance = `${Math.round(q.km)} km ${compass(q.bearing, locale)}`;
+      const distance = `${Math.round(q.km)} km ${compass(q.bearing, tr)}`;
       const place = q.place ?? distance;
       kit.drawTracked(g, kit.truncate(g, place, tw, { size: ps, family: fonts.sans }), tx, y - rowH * 0.1, { size: ps, family: fonts.sans, color: colors.ink });
-      const line = `${q.place ? `${distance} · ` : ''}${ago(now - q.time, locale)}`;
+      const line = `${q.place ? `${distance} · ` : ''}${f.ago(q.time)}`;
       kit.drawTracked(g, kit.truncate(g, line, tw, { size: meta, family: fonts.sans }), tx, y + meta * 1.05, { size: meta, family: fonts.sans, color: colors.inkDim });
     });
-    if (more) {
+    if (plan.more) {
+      // "+N more", and the strongest and the whole count, which say more about a quiet month.
       const strongest = quakes.reduce((a, b) => (b.mag > a.mag ? b : a));
-      const s = tr({ en: `${quakes.length} in ${options.days} d · strongest ${mag(strongest.mag)}`, es: `${quakes.length} en ${options.days} d · el mayor, ${mag(strongest.mag)}` });
-      const fy = Math.min(list.y + list.h - 4, list.y + shown.length * rowH + footer * 1.3);
-      kit.drawTracked(g, kit.truncate(g, s, list.w, { size: footer, family: fonts.sans }), list.x, fy, { size: footer, family: fonts.sans, color: colors.inkDim });
+      const s = `${moreLabel(plan.hidden, tr)} · ${tr({ en: `strongest ${mag(strongest.mag)} · ${quakes.length} in ${options.days} d`, es: `el mayor, ${mag(strongest.mag)} · ${quakes.length} en ${options.days} d` })}`;
+      const m = plan.more;
+      const size = Math.max(10, Math.round(m.h * 0.62));
+      const font = { size, family: fonts.sans, color: colors.inkDim };
+      kit.drawTracked(g, kit.truncate(g, s, m.w, font), m.x, m.y + (m.h + size * 0.7) / 2, font);
     }
   },
   demo: ({ now }) => {

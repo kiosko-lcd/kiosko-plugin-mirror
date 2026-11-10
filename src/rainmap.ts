@@ -12,8 +12,8 @@
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { defineWidget, t, type Box, type Canvas, type Graphics, type RenderContext } from '@kiosko/sdk';
-import { clamp, hhmm, NO_PLACE, placeFields, placeFor, USER_AGENT, within } from './util.ts';
+import { defineWidget, placeOf, t, type Box, type Canvas, type Graphics, type RenderContext } from '@kiosko/sdk';
+import { clamp, NO_PLACE, placeOptions, USER_AGENT, within } from './util.ts';
 
 /** Size of the composed map; it's drawn cropped to the card's box. */
 const OUT_W = 660, OUT_H = 400;
@@ -128,11 +128,11 @@ export const rainmap = defineWidget({
   size: { min: { w: 200, h: 140 }, preferred: { w: 600, h: 440 } },
   options: t.object({
     onlyWhenRaining: t.boolean({ default: true, label: { en: 'Only while it rains nearby', es: 'Sólo si llueve cerca' } }),
-    ...placeFields(),
+    ...placeOptions(),
   }),
   intervalMs: 10 * 60_000,
   async fetch({ options, location, canvas, dataDir, signal }): Promise<RainData> {
-    const at = placeFor(options, location);
+    const at = placeOf(options, location);
     if (!at) throw new Error(NO_PLACE);
     const res = await fetch('https://api.rainviewer.com/public/weather-maps.json', { headers: { 'User-Agent': USER_AGENT }, signal: within(signal, 10_000) });
     if (!res.ok) throw new Error(`RainViewer HTTP ${res.status}`);
@@ -170,7 +170,7 @@ export const rainmap = defineWidget({
     return { img: out, time: frame.time * 1000, rain };
   },
   visible: ({ options, data }) => Boolean(data && (!options.onlyWhenRaining || data.rain > 0.0005)),
-  render(g, { data, box, theme, kit }) {
+  render(g, { data, box, theme, kit, fmt }) {
     if (!data) return;
     const { colors, fonts } = theme;
     if (data.img) {
@@ -189,7 +189,7 @@ export const rainmap = defineWidget({
     g.stroke();
     const s = Math.round(clamp(box.h * 0.07, 11, 24));
     const credit = Math.round(clamp(s * 0.55, 9, 13));
-    const label = `radar ${hhmm(data.time)}`;
+    const label = `radar ${fmt.time(data.time)}`;
     // The map is always dark (whatever the theme): light captions on a dark band.
     g.fillStyle = 'rgba(0,0,0,0.55)';
     g.fillRect(box.x, box.y + box.h - s * 1.5, box.w, s * 1.5);

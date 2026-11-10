@@ -1,40 +1,18 @@
 /**
- * Small helpers shared by the mirror cards: language picking for labels
- * built in code, where the panel is, network timeouts and number formats.
+ * Small helpers shared by the mirror cards: where the panel is, network
+ * timeouts and number formats.
  */
 import { homedir } from 'node:os';
-import { t } from '@kiosko/sdk';
+import { locationOptions } from '@kiosko/sdk';
 
-/** True for Spanish locales (`es`, `es-ES`, `es_MX`…). */
-export const isEs = (locale: string): boolean => /^es(?:$|[-_])/i.test(locale);
-
-/** Picks the Spanish or the English text by locale. */
-export const pickLang = (locale: string, en: string, es: string): string => (isEs(locale) ? es : en);
-
-/** Latitude/longitude override fields, for the cards that look outside. */
-export const placeFields = () => ({
-  latitude: t.number({
-    default: 0,
-    min: -90,
-    max: 90,
-    step: 0.0001,
-    unit: '°',
-    advanced: true,
-    label: { en: 'Latitude', es: 'Latitud' },
-    help: { en: 'Leave latitude and longitude at 0 to use the place set in Settings.', es: 'Con latitud y longitud a 0 se usa el lugar de los ajustes.' },
-  }),
-  longitude: t.number({ default: 0, min: -180, max: 180, step: 0.0001, unit: '°', advanced: true, label: { en: 'Longitude', es: 'Longitud' } }),
-});
-
-export interface Place {
-  latitude: number;
-  longitude: number;
-}
-
-/** The card's own coordinates if set (not 0,0), else the user's place. */
-export function placeFor(options: { latitude: number; longitude: number }, location: Place | undefined): Place | null {
-  if (options.latitude !== 0 || options.longitude !== 0) return { latitude: options.latitude, longitude: options.longitude };
-  return location ? { latitude: location.latitude, longitude: location.longitude } : null;
+/**
+ * Latitude and longitude override fields (advanced; 0, 0 = the place in
+ * Settings), for the cards that look outside. The shared ones without the
+ * place name, which these cards don't show. Pick with `placeOf`.
+ */
+export function placeOptions() {
+  const { latitude, longitude } = locationOptions();
+  return { latitude, longitude };
 }
 
 export const NO_PLACE = 'no coordinates: set your place in Settings, or latitude and longitude in the card options';
@@ -59,12 +37,6 @@ export function fmt(n: number, locale: string, decimals = 0): string {
 }
 
 export const clamp = (v: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, v));
-
-/** `HH:MM`, local time. */
-export const hhmm = (ms: number): string => {
-  const d = new Date(ms);
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-};
 
 /** `YYYY-MM-DD` of a local day. */
 export function dayKey(ms: number): string {
