@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { localize, defaultsOf, validate, DEFAULT_WORKDAY } from '@kiosko/sdk';
+import { createCanvas, loadImage } from '@napi-rs/canvas';
+import * as kit from '@loksly/lcd-canvas-kit';
+import { createBaseContext, localize, defaultsOf, validate, DEFAULT_THEME, DEFAULT_WORKDAY } from '@kiosko/sdk';
 import { airquality, aqiCategory, parseAir, pollenLevel } from './airquality.ts';
 import { phrasesFor, pick, poolFor } from './compliments.ts';
 import { countdown, countdownLevel, daysUntil, upcoming } from './countdown.ts';
@@ -9,6 +11,7 @@ import { choosePlayer, parsePlayer, positionAt } from './nowplaying.ts';
 import { cleanText, wikiLang, yearsAgo } from './onthisday.ts';
 import { isPng, tilesAround, wetFraction, worldPx } from './rainmap.ts';
 import { ISSUE_QUERIES, issuesByDay, mergeIssues, parseTaskFile, sortTasks, tasks } from './tasks.ts';
+import { trafficmap } from './trafficmap.ts';
 import { compliments } from './compliments.ts';
 import { nowplaying } from './nowplaying.ts';
 import { rainmap } from './rainmap.ts';
@@ -163,6 +166,66 @@ test('rain radar: world pixels, the tiles that cover the box, wet fraction', () 
   assert.ok(!isPng(Buffer.from('<html>notice</html>')));
 });
 
+test('traffic map: composes flow over the map, authenticates without putting the key in URLs', async (t) => {
+  const image = (color: string) => {
+    const c = createCanvas(256, 256);
+    c.getContext('2d').fillStyle = color;
+    c.getContext('2d').fillRect(0, 0, 256, 256);
+    return c.toBuffer('image/png');
+  };
+  const base = image('#0000ff'), flow = image('#00ff00');
+  const calls: { url: string; key: string | null }[] = [];
+  t.mock.method(globalThis, 'fetch', async (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+    const url = String(input);
+    calls.push({ url, key: new Headers(init?.headers).get('TomTom-Api-Key') });
+    if (url.includes('/copyrights/')) return Response.json({ copyrightsCaption: '©TomTom, ©OpenStreetMap' });
+    return new Response(new Uint8Array(url.includes('/traffic/flow/') ? flow : base), { headers: { 'Content-Type': 'image/png' } });
+  });
+  const options = { ...defaultsOf(trafficmap.options!), apiKey: 'test-key' };
+  const ctx = { ...createBaseContext({ now: 123, location: { latitude: 37.9922, longitude: -1.1307 } }), options, canvas: { createCanvas, loadImage }, signal: new AbortController().signal, timeoutMs: 120_000, sources: {} };
+  const data = await trafficmap.fetch!(ctx);
+  assert.equal(data.time, 123);
+  assert.equal(data.credit, '©TomTom, ©OpenStreetMap');
+  assert.deepEqual([data.img?.width, data.img?.height], [660, 400]);
+  assert.deepEqual([...data.img!.getContext('2d').getImageData(330, 200, 1, 1).data], [0, 255, 0, 255]);
+  const screen = createCanvas(200, 140);
+  const renderCtx = { ...ctx, data, box: { x: 0, y: 0, w: 200, h: 140 }, theme: DEFAULT_THEME, fonts: DEFAULT_THEME.fonts, kit, preview: false, working: true };
+  assert.doesNotThrow(() => trafficmap.render(screen.getContext('2d'), renderCtx));
+  assert.doesNotThrow(() => trafficmap.render(screen.getContext('2d'), { ...renderCtx, data: { time: 123, credit: '©TomTom, ©OpenStreetMap' } }));
+  const bases = calls.filter((c) => c.url.includes('/display/raster/'));
+  const flows = calls.filter((c) => c.url.includes('/traffic/flow/'));
+  assert.ok(bases.length >= 4 && bases.length <= 9);
+  assert.equal(flows.length, bases.length);
+  assert.ok(calls.every((c) => c.key === 'test-key' && !c.url.includes('test-key')));
+  assert.ok(bases.every((c) => c.url.includes('style=street-dark')));
+  assert.ok(flows.every((c) => c.url.includes('style=dark')));
+  assert.equal(trafficmap.options!.props.apiKey.secret, true);
+
+  calls.length = 0;
+  await trafficmap.fetch!({ ...ctx, location: { latitude: 90, longitude: 180 } });
+  for (const c of calls.filter((c) => c.url.includes('/raster/tile/'))) {
+    const match = c.url.match(/\/tile\/12\/(\d+)\/(\d+)/);
+    assert.ok(match);
+    assert.ok(Number(match[1]) < 4096 && Number(match[2]) < 4096);
+  }
+});
+
+test('traffic map: missing settings, HTTP errors, invalid tiles and attribution fail explicitly', async (t) => {
+  const options = { ...defaultsOf(trafficmap.options!), apiKey: 'test-key' };
+  const ctx = { ...createBaseContext({ now: 123, location: { latitude: 37.9922, longitude: -1.1307 } }), options, canvas: { createCanvas, loadImage }, signal: new AbortController().signal, timeoutMs: 120_000, sources: {} };
+  await assert.rejects(trafficmap.fetch!({ ...ctx, options: { ...options, apiKey: '' } }), /API key/);
+  await assert.rejects(trafficmap.fetch!({ ...ctx, location: undefined }), /no coordinates/);
+  await assert.rejects(trafficmap.fetch!({ ...ctx, location: { latitude: 91, longitude: 0 } }), /Invalid traffic map coordinates/);
+
+  const fetchMock = t.mock.method(globalThis, 'fetch', async () => new Response('', { status: 403 }));
+  await assert.rejects(trafficmap.fetch!(ctx), /TomTom HTTP 403/);
+  fetchMock.mock.mockImplementation(async (input) => String(input).includes('/copyrights/') ? Response.json({ copyrightsCaption: '©TomTom' }) : new Response('not a PNG'));
+  await assert.rejects(trafficmap.fetch!(ctx), /invalid PNG/);
+  const png = createCanvas(256, 256).toBuffer('image/png');
+  fetchMock.mock.mockImplementation(async (input) => String(input).includes('/copyrights/') ? Response.json({}) : new Response(new Uint8Array(png)));
+  await assert.rejects(trafficmap.fetch!(ctx), /no map attribution/);
+});
+
 test('earthquakes: shared list rows (4 by default) and an empty switch, hidden by default', () => {
   const d = defaultsOf(earthquakes.options!);
   assert.equal(d.rows, 4);
@@ -174,7 +237,7 @@ test('earthquakes: shared list rows (4 by default) and an empty switch, hidden b
 });
 
 test('place: the cards share latitude and longitude, 0,0 = Settings; booleans named show…', () => {
-  for (const w of [airquality, earthquakes, rainmap]) {
+  for (const w of [airquality, earthquakes, rainmap, trafficmap]) {
     const o = validate(w.options!, {}).value as Record<string, unknown>;
     assert.equal(o.latitude, 0, w.id);
     assert.equal(o.longitude, 0, w.id);
@@ -187,7 +250,7 @@ test('place: the cards share latitude and longitude, 0,0 = Settings; booleans na
 test('plugin: every widget has an icon, a category, sizes and demo data', () => {
   assert.equal(plugin.id, 'mirror');
   const ids = (plugin.widgets ?? []).map((w) => w.id);
-  assert.deepEqual(ids, ['countdown', 'compliments', 'tasks', 'nowplaying', 'onthisday', 'airquality', 'earthquakes', 'rainmap']);
+  assert.deepEqual(ids, ['countdown', 'compliments', 'tasks', 'nowplaying', 'onthisday', 'airquality', 'earthquakes', 'rainmap', 'trafficmap']);
   for (const w of plugin.widgets ?? []) {
     assert.ok(w.icon && w.category && w.size?.preferred && w.demo, w.id);
     assert.doesNotThrow(() => w.demo!({ options: w.options!.default, now: Date.now(), locale: "en" }), w.id);

@@ -1,6 +1,6 @@
 # kiosko-plugin-mirror
 
-MagicMirror²-style cards: countdown, compliments, today and tomorrow, now playing, on this day, air quality, earthquakes and rain radar.
+MagicMirror²-style cards: countdown, compliments, today and tomorrow, now playing, on this day, air quality, earthquakes, rain radar and traffic.
 
 A plugin for [Kiosko](https://github.com/kiosko-lcd/kiosko), the widget mosaic for small USB LCD panels.
 
@@ -18,7 +18,7 @@ npm install --prefix ~/.config/kiosko/plugins kiosko-plugin-mirror
 
 ## Requirements
 
-- Location in Kiosko → Settings for air quality, earthquakes and the rain radar. *Now playing* reads MPRIS (Linux).
+- Location in Kiosko → Settings for air quality, earthquakes, rain radar and traffic. *Now playing* reads MPRIS (Linux).
 
 ## Widgets
 
@@ -126,6 +126,19 @@ Latest rain radar (RainViewer) over a dark OpenStreetMap map, home in the centre
 | Option | Type | Default | |
 |---|---|---|---|
 | `onlyWhenRaining` | boolean | `true` | Only while it rains nearby |
+| `latitude` | number | `0` | Latitude. Leave latitude and longitude at 0 to use the place in Settings. |
+| `longitude` | number | `0` | Longitude |
+
+### Traffic map — `mirror/trafficmap`
+
+Live traffic flow around your location on a dark TomTom map. Green indicates traffic near free-flow speed, amber slower traffic, and red severe congestion; missing colored roads do not necessarily mean clear traffic. Data coverage varies by road.
+
+Create a [TomTom developer account](https://my.tomtom.com/), obtain an API key with access to Map Display and Traffic, and enter it in the widget options. TomTom offers a [free tier](https://docs.tomtom.com/pricing); check current limits and terms. Every refresh requests several map and traffic tiles, so additional widgets or faster refresh intervals increase usage. The default refresh is every 10 minutes.
+
+| Option | Type | Default | |
+|---|---|---|---|
+| `apiKey` | secret string | `""` | TomTom API key. Required. |
+| `zoom` | number | `12` | Map zoom, from 8 to 16. Higher values show a smaller area. |
 | `latitude` | number | `0` | Latitude. Leave latitude and longitude at 0 to use the place in Settings. |
 | `longitude` | number | `0` | Longitude |
 
