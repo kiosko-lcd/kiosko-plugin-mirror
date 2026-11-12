@@ -131,7 +131,7 @@ export const rainmap = defineWidget({
     ...placeOptions(),
   }),
   intervalMs: 10 * 60_000,
-  async fetch({ options, location, canvas, dataDir, signal }): Promise<RainData> {
+  async fetch({ options, location, canvas, cacheDir, dataDir, signal }): Promise<RainData> {
     const at = placeOf(options, location);
     if (!at) throw new Error(NO_PLACE);
     const res = await fetch('https://api.rainviewer.com/public/weather-maps.json', { headers: { 'User-Agent': USER_AGENT }, signal: within(signal, 10_000) });
@@ -148,7 +148,7 @@ export const rainmap = defineWidget({
     ctx.fillRect(0, 0, OUT_W, OUT_H);
     const size = 256 * SCALE;
     for (const tile of tiles) {
-      const [b, r] = await Promise.all([baseTile(dataDir, tile.x, tile.y, signal), get(`${maps.host}${frame.path}/256/${ZOOM}/${tile.x}/${tile.y}/2/1_1.png`, signal)]);
+      const [b, r] = await Promise.all([baseTile(cacheDir || dataDir, tile.x, tile.y, signal), get(`${maps.host}${frame.path}/256/${ZOOM}/${tile.x}/${tile.y}/2/1_1.png`, signal)]);
       if (b) ctx.drawImage(await canvas.loadImage(b), tile.dx * SCALE, tile.dy * SCALE, size, size);
       if (r && isPng(r)) rctx.drawImage(await canvas.loadImage(r), tile.dx * SCALE, tile.dy * SCALE, size, size);
     }
