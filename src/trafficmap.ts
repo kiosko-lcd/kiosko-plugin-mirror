@@ -8,7 +8,9 @@ import { clamp, NO_PLACE, placeOptions, USER_AGENT, within } from './util.ts';
 
 const OUT_W = 660, OUT_H = 400, SCALE = 1.5;
 const MAX_LAT = 85.05112878;
-const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+// A plain array, not a Buffer: this module is evaluated when the browser demo starts, and a browser has
+// no `Buffer` (the demo died with "Buffer is not defined"). Use Buffer only inside functions.
+const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
 export interface TrafficData {
   img?: Canvas;
@@ -27,7 +29,7 @@ async function request(path: string, key: string, signal: AbortSignal): Promise<
 
 async function tile(path: string, key: string, signal: AbortSignal): Promise<Buffer> {
   const buf = Buffer.from(await (await request(path, key, signal)).arrayBuffer());
-  if (buf.length < PNG_SIGNATURE.length || !buf.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE)) {
+  if (buf.length < PNG_SIGNATURE.length || !PNG_SIGNATURE.every((b, i) => buf[i] === b)) {
     throw new Error('TomTom returned an invalid PNG tile');
   }
   return buf;
