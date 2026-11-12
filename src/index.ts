@@ -19,7 +19,7 @@ export { airquality, compliments, countdown, earthquakes, nowplaying, onthisday,
 export default definePlugin({
   id: 'mirror',
   name: { en: 'Mirror cards', es: 'Tarjetas Mirror' },
-  version: '0.2.0',
+  version: '0.2.1',
   description: {
     en: 'MagicMirror²-style cards: countdown, compliments, today and tomorrow, now playing, on this day, air quality, earthquakes, rain radar and traffic.',
     es: 'Tarjetas al estilo de MagicMirror²: cuenta atrás, frases, hoy y mañana, lo que suena, tal día como hoy, calidad del aire, terremotos, radar de lluvia y tráfico.',
