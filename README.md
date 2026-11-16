@@ -18,7 +18,13 @@ npm install --prefix ~/.config/kiosko/plugins kiosko-plugin-mirror
 
 ## Requirements
 
-- Location in Kiosko → Settings for air quality, earthquakes, rain radar and traffic. *Now playing* reads MPRIS (Linux).
+- Location in Kiosko → Settings for air quality, earthquakes and the rain radar. *Now playing* reads MPRIS (Linux).
+
+## What it does on your machine
+
+- **Internet**: contacts `air-quality-api.open-meteo.com`, `www.seismicportal.eu`, `api.rainviewer.com`, `tile.openstreetmap.org`, `nominatim.openstreetmap.org`, `*.wikipedia.org`, `api.tomtom.com`.
+- **Runs**: `gdbus`, `glab`.
+- **Devices**: mpris.
 
 ## Widgets
 
@@ -131,16 +137,29 @@ Latest rain radar (RainViewer) over a dark OpenStreetMap map, home in the centre
 
 ### Traffic map — `mirror/trafficmap`
 
-Live traffic flow around your location on a dark TomTom map. Green indicates traffic near free-flow speed, amber slower traffic, and red severe congestion; missing colored roads do not necessarily mean clear traffic. Data coverage varies by road.
+Live traffic flow around your place on a dark TomTom map.
 
-Create a [TomTom developer account](https://my.tomtom.com/), obtain an API key with access to Map Display and Traffic, and enter it in the widget options. TomTom offers a [free tier](https://docs.tomtom.com/pricing); check current limits and terms. Every refresh requests several map and traffic tiles, so additional widgets or faster refresh intervals increase usage. The default refresh is every 10 minutes.
+![Traffic map](docs/trafficmap.png)
 
 | Option | Type | Default | |
 |---|---|---|---|
-| `apiKey` | secret string | `""` | TomTom API key. Required. |
-| `zoom` | number | `12` | Map zoom, from 8 to 16. Higher values show a smaller area. |
+| `apiKey` | string | *(secret)* | TomTom API key. Create a free account at tomtom.com and enable Map Display and Traffic APIs. |
+| `zoom` | number | `12` | Zoom. Higher numbers show a smaller area in more detail. |
 | `latitude` | number | `0` | Latitude. Leave latitude and longitude at 0 to use the place in Settings. |
 | `longitude` | number | `0` | Longitude |
+
+### Traffic map: colours and the TomTom key
+
+Green is traffic near free-flow speed, amber slower traffic and red severe
+congestion; roads without colour don't necessarily mean clear traffic, as
+coverage varies by road.
+
+Create a [TomTom developer account](https://my.tomtom.com/), obtain an API key
+with access to Map Display and Traffic, and enter it in the widget options.
+TomTom offers a [free tier](https://docs.tomtom.com/pricing); check current
+limits and terms. Every refresh requests several map and traffic tiles, so
+more widgets or faster refresh intervals increase usage. The default refresh
+is every 10 minutes.
 
 ## Development
 

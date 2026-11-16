@@ -1,0 +1,1241 @@
+{
+  "manifest": 1,
+  "id": "mirror",
+  "package": "kiosko-plugin-mirror",
+  "name": {
+    "en": "Mirror cards",
+    "es": "Tarjetas Mirror"
+  },
+  "version": "0.2.1",
+  "description": {
+    "en": "MagicMirror²-style cards: countdown, compliments, today and tomorrow, now playing, on this day, air quality, earthquakes, rain radar and traffic.",
+    "es": "Tarjetas al estilo de MagicMirror²: cuenta atrás, frases, hoy y mañana, lo que suena, tal día como hoy, calidad del aire, terremotos, radar de lluvia y tráfico."
+  },
+  "author": "Kiosko",
+  "license": "MIT",
+  "homepage": "https://github.com/kiosko-lcd/kiosko-plugin-mirror#readme",
+  "repository": "https://github.com/kiosko-lcd/kiosko-plugin-mirror.git",
+  "icon": "layout-grid",
+  "sdk": "^0.2.0",
+  "platforms": [
+    "linux",
+    "darwin",
+    "win32"
+  ],
+  "languages": [
+    "en",
+    "es"
+  ],
+  "categories": [
+    "time",
+    "fun",
+    "productivity",
+    "media",
+    "info"
+  ],
+  "tags": [
+    "magicmirror",
+    "dates",
+    "motivation",
+    "todo",
+    "spotify",
+    "mpris",
+    "history",
+    "wikipedia",
+    "weather",
+    "pollen",
+    "seismic",
+    "radar",
+    "map",
+    "traffic",
+    "roads"
+  ],
+  "permissions": {
+    "network": [
+      "air-quality-api.open-meteo.com",
+      "www.seismicportal.eu",
+      "api.rainviewer.com",
+      "tile.openstreetmap.org",
+      "nominatim.openstreetmap.org",
+      "*.wikipedia.org",
+      "api.tomtom.com"
+    ],
+    "exec": [
+      "gdbus",
+      "glab"
+    ],
+    "devices": [
+      "mpris"
+    ]
+  },
+  "riskyOptions": [
+    {
+      "path": "mirror/tasks: file",
+      "risk": [
+        "path"
+      ],
+      "secret": false
+    },
+    {
+      "path": "mirror/tasks: bin",
+      "risk": [
+        "exec"
+      ],
+      "secret": false
+    },
+    {
+      "path": "mirror/trafficmap: apiKey",
+      "risk": [],
+      "secret": true
+    }
+  ],
+  "requires": [],
+  "optional": [],
+  "widgets": [
+    {
+      "type": "mirror/countdown",
+      "name": {
+        "en": "Countdown",
+        "es": "Cuenta atrás"
+      },
+      "description": {
+        "en": "Days left until your important dates, nearest first. Birthdays and anniversaries come back every year.",
+        "es": "Los días que faltan para tus fechas importantes, la más cercana primero. Cumpleaños y aniversarios vuelven cada año."
+      },
+      "icon": "hourglass",
+      "category": "time",
+      "tags": [
+        "magicmirror",
+        "dates"
+      ],
+      "size": {
+        "min": {
+          "w": 240,
+          "h": 100
+        },
+        "preferred": {
+          "w": 400,
+          "h": 300
+        }
+      },
+      "chrome": "card",
+      "sources": [],
+      "options": {
+        "default": {
+          "events": [],
+          "rows": 4,
+          "warnDays": 7,
+          "alertDays": 1
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "events": {
+            "title": "Dates",
+            "description": "Past dates hide themselves; yearly ones come back.",
+            "default": [],
+            "x-ui": {
+              "label": {
+                "en": "Dates",
+                "es": "Fechas"
+              },
+              "help": {
+                "en": "Past dates hide themselves; yearly ones come back.",
+                "es": "Las fechas pasadas desaparecen solas; las de cada año vuelven."
+              }
+            },
+            "type": "array",
+            "items": {
+              "default": {
+                "name": "",
+                "date": "",
+                "yearly": false
+              },
+              "x-ui": {},
+              "type": "object",
+              "properties": {
+                "name": {
+                  "title": "What",
+                  "default": "",
+                  "x-ui": {
+                    "label": {
+                      "en": "What",
+                      "es": "Qué"
+                    },
+                    "placeholder": "Holidays"
+                  },
+                  "type": "string"
+                },
+                "date": {
+                  "title": "Date",
+                  "default": "",
+                  "x-ui": {
+                    "label": {
+                      "en": "Date",
+                      "es": "Fecha"
+                    },
+                    "placeholder": "2027-01-25",
+                    "format": "date"
+                  },
+                  "type": "string",
+                  "format": "date"
+                },
+                "yearly": {
+                  "title": "Every year",
+                  "description": "Birthdays and anniversaries: the year of the date doesn’t matter.",
+                  "default": false,
+                  "x-ui": {
+                    "label": {
+                      "en": "Every year",
+                      "es": "Cada año"
+                    },
+                    "help": {
+                      "en": "Birthdays and anniversaries: the year of the date doesn’t matter.",
+                      "es": "Cumpleaños y aniversarios: el año de la fecha da igual."
+                    }
+                  },
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "rows": {
+            "title": "Rows",
+            "description": "0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in \"+N more\".",
+            "default": 4,
+            "x-ui": {
+              "label": {
+                "en": "Rows",
+                "es": "Filas"
+              },
+              "help": {
+                "en": "0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in \"+N more\".",
+                "es": "0 = las que quepan. Con un número se ven esas, en filas de un tamaño legible (menos si la tesela no da para ellas); el resto se cuenta en «+N más»."
+              }
+            },
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30
+          },
+          "warnDays": {
+            "title": "Amber from (days before)",
+            "default": 7,
+            "x-ui": {
+              "label": {
+                "en": "Amber from (days before)",
+                "es": "Ámbar desde (días antes)"
+              },
+              "unit": "d"
+            },
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 365
+          },
+          "alertDays": {
+            "title": "Red from (days before)",
+            "description": "0: only on the day.",
+            "default": 1,
+            "x-ui": {
+              "label": {
+                "en": "Red from (days before)",
+                "es": "Rojo desde (días antes)"
+              },
+              "help": {
+                "en": "0: only on the day.",
+                "es": "0: sólo el mismo día."
+              },
+              "unit": "d"
+            },
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 365
+          }
+        }
+      },
+      "screenshot": "docs/countdown.png",
+      "animated": false,
+      "urgent": false
+    },
+    {
+      "type": "mirror/compliments",
+      "name": {
+        "en": "Compliments",
+        "es": "Frases"
+      },
+      "description": {
+        "en": "A phrase that suits the time of day, like the MagicMirror² classic.",
+        "es": "Una frase según la hora del día, como el clásico de MagicMirror²."
+      },
+      "icon": "quote",
+      "category": "fun",
+      "tags": [
+        "magicmirror",
+        "motivation"
+      ],
+      "size": {
+        "min": {
+          "w": 200,
+          "h": 80
+        },
+        "preferred": {
+          "w": 600,
+          "h": 220
+        }
+      },
+      "chrome": "card",
+      "sources": [],
+      "options": {
+        "default": {
+          "morning": [],
+          "afternoon": [],
+          "evening": [],
+          "anytime": [],
+          "changeMs": 1800000,
+          "maxSize": 56,
+          "align": "left"
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "morning": {
+            "title": "Morning (3–12 h)",
+            "description": "Leave every list empty to use the built-in phrases, in your language.",
+            "default": [],
+            "x-ui": {
+              "label": {
+                "en": "Morning (3–12 h)",
+                "es": "Mañana (3–12 h)"
+              },
+              "help": {
+                "en": "Leave every list empty to use the built-in phrases, in your language.",
+                "es": "Con todas las listas vacías salen las frases de serie, en tu idioma."
+              }
+            },
+            "type": "array",
+            "items": {
+              "default": "",
+              "x-ui": {
+                "placeholder": "…"
+              },
+              "type": "string"
+            }
+          },
+          "afternoon": {
+            "title": "Afternoon (12–17 h)",
+            "description": "Leave every list empty to use the built-in phrases, in your language.",
+            "default": [],
+            "x-ui": {
+              "label": {
+                "en": "Afternoon (12–17 h)",
+                "es": "Tarde (12–17 h)"
+              },
+              "help": {
+                "en": "Leave every list empty to use the built-in phrases, in your language.",
+                "es": "Con todas las listas vacías salen las frases de serie, en tu idioma."
+              }
+            },
+            "type": "array",
+            "items": {
+              "default": "",
+              "x-ui": {
+                "placeholder": "…"
+              },
+              "type": "string"
+            }
+          },
+          "evening": {
+            "title": "Evening and night",
+            "description": "Leave every list empty to use the built-in phrases, in your language.",
+            "default": [],
+            "x-ui": {
+              "label": {
+                "en": "Evening and night",
+                "es": "Noche"
+              },
+              "help": {
+                "en": "Leave every list empty to use the built-in phrases, in your language.",
+                "es": "Con todas las listas vacías salen las frases de serie, en tu idioma."
+              }
+            },
+            "type": "array",
+            "items": {
+              "default": "",
+              "x-ui": {
+                "placeholder": "…"
+              },
+              "type": "string"
+            }
+          },
+          "anytime": {
+            "title": "Any time",
+            "description": "Leave every list empty to use the built-in phrases, in your language.",
+            "default": [],
+            "x-ui": {
+              "label": {
+                "en": "Any time",
+                "es": "A cualquier hora"
+              },
+              "help": {
+                "en": "Leave every list empty to use the built-in phrases, in your language.",
+                "es": "Con todas las listas vacías salen las frases de serie, en tu idioma."
+              }
+            },
+            "type": "array",
+            "items": {
+              "default": "",
+              "x-ui": {
+                "placeholder": "…"
+              },
+              "type": "string"
+            }
+          },
+          "changeMs": {
+            "title": "Change every",
+            "default": 1800000,
+            "x-ui": {
+              "label": {
+                "en": "Change every",
+                "es": "Cambia cada"
+              },
+              "unit": "ms"
+            },
+            "type": "integer",
+            "minimum": 60000
+          },
+          "maxSize": {
+            "title": "Largest letter size",
+            "default": 56,
+            "x-ui": {
+              "label": {
+                "en": "Largest letter size",
+                "es": "Tamaño máximo de letra"
+              },
+              "unit": "px",
+              "slider": true
+            },
+            "type": "integer",
+            "minimum": 16,
+            "maximum": 200
+          },
+          "align": {
+            "title": "Alignment",
+            "default": "left",
+            "x-ui": {
+              "label": {
+                "en": "Alignment",
+                "es": "Alineación"
+              },
+              "labels": {
+                "left": {
+                  "en": "Left",
+                  "es": "Izquierda"
+                },
+                "center": {
+                  "en": "Centre",
+                  "es": "Centro"
+                },
+                "right": {
+                  "en": "Right",
+                  "es": "Derecha"
+                }
+              }
+            },
+            "type": "string",
+            "enum": [
+              "left",
+              "center",
+              "right"
+            ]
+          }
+        }
+      },
+      "screenshot": "docs/compliments.png",
+      "animated": false,
+      "urgent": false
+    },
+    {
+      "type": "mirror/tasks",
+      "name": {
+        "en": "Today and tomorrow",
+        "es": "Hoy y mañana"
+      },
+      "description": {
+        "en": "Your to-dos for today and tomorrow, from a Markdown checklist and, optionally, your GitLab issues.",
+        "es": "Lo que tienes para hoy y mañana, de una lista de casillas en Markdown y, si quieres, de tus issues de GitLab."
+      },
+      "icon": "list-checks",
+      "category": "productivity",
+      "tags": [
+        "magicmirror",
+        "todo"
+      ],
+      "size": {
+        "min": {
+          "w": 240,
+          "h": 140
+        },
+        "preferred": {
+          "w": 400,
+          "h": 440
+        }
+      },
+      "chrome": "card",
+      "sources": [],
+      "options": {
+        "default": {
+          "file": "~/tasks.md",
+          "includeIssues": false,
+          "bin": "glab",
+          "showTomorrow": true,
+          "rows": 0
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "file": {
+            "title": "Checklist file",
+            "description": "Markdown with \"- [ ] …\" boxes under \"## Today\" and \"## Tomorrow\"; \"@2026-10-14\" dates a box.",
+            "default": "~/tasks.md",
+            "x-ui": {
+              "label": {
+                "en": "Checklist file",
+                "es": "Fichero de tareas"
+              },
+              "help": {
+                "en": "Markdown with \"- [ ] …\" boxes under \"## Today\" and \"## Tomorrow\"; \"@2026-10-14\" dates a box.",
+                "es": "Markdown con casillas «- [ ] …» bajo «## Hoy» y «## Mañana»; «@2026-10-14» le pone fecha."
+              },
+              "format": "path"
+            },
+            "x-risk": "path",
+            "type": "string"
+          },
+          "includeIssues": {
+            "title": "Add my GitLab issues with a due date",
+            "description": "Due today or tomorrow, and every overdue one.",
+            "default": false,
+            "x-ui": {
+              "label": {
+                "en": "Add my GitLab issues with a due date",
+                "es": "Añadir mis issues de GitLab con fecha"
+              },
+              "help": {
+                "en": "Due today or tomorrow, and every overdue one.",
+                "es": "Las que vencen hoy o mañana, y todas las vencidas."
+              }
+            },
+            "type": "boolean"
+          },
+          "bin": {
+            "title": "glab command",
+            "description": "The GitLab CLI, already logged in.",
+            "default": "glab",
+            "x-ui": {
+              "label": {
+                "en": "glab command",
+                "es": "Comando glab"
+              },
+              "help": {
+                "en": "The GitLab CLI, already logged in.",
+                "es": "El CLI de GitLab, con la sesión iniciada."
+              },
+              "advanced": true,
+              "format": "path"
+            },
+            "x-risk": "exec",
+            "type": "string"
+          },
+          "showTomorrow": {
+            "title": "Tomorrow too",
+            "description": "Off: only today, for small tiles.",
+            "default": true,
+            "x-ui": {
+              "label": {
+                "en": "Tomorrow too",
+                "es": "También mañana"
+              },
+              "help": {
+                "en": "Off: only today, for small tiles.",
+                "es": "Apagado: sólo hoy, para teselas pequeñas."
+              }
+            },
+            "type": "boolean"
+          },
+          "rows": {
+            "title": "Rows",
+            "description": "0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in \"+N more\".",
+            "default": 0,
+            "x-ui": {
+              "label": {
+                "en": "Rows",
+                "es": "Filas"
+              },
+              "help": {
+                "en": "0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in \"+N more\".",
+                "es": "0 = las que quepan. Con un número se ven esas, en filas de un tamaño legible (menos si la tesela no da para ellas); el resto se cuenta en «+N más»."
+              }
+            },
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30
+          }
+        }
+      },
+      "screenshot": "docs/tasks.png",
+      "animated": false,
+      "urgent": false
+    },
+    {
+      "type": "mirror/nowplaying",
+      "name": {
+        "en": "Now playing",
+        "es": "Sonando"
+      },
+      "description": {
+        "en": "The song playing on this computer (any MPRIS player on Linux: Spotify, browser, VLC…), with cover and progress. Hidden while nothing plays.",
+        "es": "La canción que suena en este ordenador (cualquier reproductor MPRIS de Linux: Spotify, navegador, VLC…), con portada y avance. Se oculta si no suena nada."
+      },
+      "icon": "music",
+      "category": "media",
+      "tags": [
+        "magicmirror",
+        "spotify",
+        "mpris"
+      ],
+      "size": {
+        "min": {
+          "w": 280,
+          "h": 100
+        },
+        "preferred": {
+          "w": 600,
+          "h": 220
+        }
+      },
+      "chrome": "card",
+      "sources": [],
+      "options": {
+        "default": {
+          "showPaused": false,
+          "prefer": "",
+          "showCover": true
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "showPaused": {
+            "title": "Also while paused",
+            "default": false,
+            "x-ui": {
+              "label": {
+                "en": "Also while paused",
+                "es": "También en pausa"
+              }
+            },
+            "type": "boolean"
+          },
+          "prefer": {
+            "title": "Preferred player",
+            "description": "Part of its MPRIS name; empty = whichever plays.",
+            "default": "",
+            "x-ui": {
+              "label": {
+                "en": "Preferred player",
+                "es": "Reproductor preferido"
+              },
+              "help": {
+                "en": "Part of its MPRIS name; empty = whichever plays.",
+                "es": "Parte de su nombre MPRIS; vacío = el que suene."
+              },
+              "placeholder": "spotify"
+            },
+            "type": "string"
+          },
+          "showCover": {
+            "title": "Show the cover",
+            "default": true,
+            "x-ui": {
+              "label": {
+                "en": "Show the cover",
+                "es": "Mostrar la portada"
+              }
+            },
+            "type": "boolean"
+          }
+        }
+      },
+      "screenshot": "docs/nowplaying.png",
+      "animated": false,
+      "urgent": false
+    },
+    {
+      "type": "mirror/onthisday",
+      "name": {
+        "en": "On this day",
+        "es": "Tal día como hoy"
+      },
+      "description": {
+        "en": "Selected anniversaries of today from Wikipedia, one at a time.",
+        "es": "Efemérides de hoy seleccionadas por la Wikipedia, una a una."
+      },
+      "icon": "landmark",
+      "category": "info",
+      "tags": [
+        "magicmirror",
+        "history",
+        "wikipedia"
+      ],
+      "size": {
+        "min": {
+          "w": 240,
+          "h": 120
+        },
+        "preferred": {
+          "w": 600,
+          "h": 220
+        }
+      },
+      "chrome": "card",
+      "sources": [],
+      "options": {
+        "default": {
+          "lang": "",
+          "changeMs": 600000
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "lang": {
+            "title": "Wikipedia language",
+            "description": "A code such as en, es, de; empty = yours. Not every edition has this feed.",
+            "default": "",
+            "x-ui": {
+              "label": {
+                "en": "Wikipedia language",
+                "es": "Idioma de la Wikipedia"
+              },
+              "help": {
+                "en": "A code such as en, es, de; empty = yours. Not every edition has this feed.",
+                "es": "Un código como es, en, de; vacío = el tuyo. No todas las ediciones tienen esta sección."
+              },
+              "placeholder": "en"
+            },
+            "type": "string",
+            "maxLength": 3
+          },
+          "changeMs": {
+            "title": "Change every",
+            "default": 600000,
+            "x-ui": {
+              "label": {
+                "en": "Change every",
+                "es": "Cambia cada"
+              },
+              "unit": "ms"
+            },
+            "type": "integer",
+            "minimum": 60000
+          }
+        }
+      },
+      "screenshot": "docs/onthisday.png",
+      "animated": false,
+      "urgent": false
+    },
+    {
+      "type": "mirror/airquality",
+      "name": {
+        "en": "Air quality",
+        "es": "Calidad del aire"
+      },
+      "description": {
+        "en": "Air quality index (European or US), particles, gases and pollen where you are (Open-Meteo).",
+        "es": "Índice de calidad del aire (europeo o de EE. UU.), partículas, gases y polen donde estás (Open-Meteo)."
+      },
+      "icon": "wind",
+      "category": "info",
+      "tags": [
+        "magicmirror",
+        "weather",
+        "pollen"
+      ],
+      "size": {
+        "min": {
+          "w": 240,
+          "h": 130
+        },
+        "preferred": {
+          "w": 400,
+          "h": 300
+        }
+      },
+      "chrome": "card",
+      "sources": [],
+      "options": {
+        "default": {
+          "index": "european",
+          "onlyAbove": 0,
+          "showPollen": true,
+          "latitude": 0,
+          "longitude": 0
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "index": {
+            "title": "Index",
+            "default": "european",
+            "x-ui": {
+              "label": {
+                "en": "Index",
+                "es": "Índice"
+              },
+              "labels": {
+                "european": {
+                  "en": "European (EAQI, 0–100+)",
+                  "es": "Europeo (EAQI, 0–100+)"
+                },
+                "us": {
+                  "en": "US (AQI, 0–500)",
+                  "es": "EE. UU. (AQI, 0–500)"
+                }
+              }
+            },
+            "type": "string",
+            "enum": [
+              "european",
+              "us"
+            ]
+          },
+          "onlyAbove": {
+            "title": "Only from index",
+            "description": "0: always. Otherwise it takes its turn only when the index reaches this, on its own scale (European: 40 is moderate, 60 poor; US: 100 is unhealthy for sensitive groups).",
+            "default": 0,
+            "x-ui": {
+              "label": {
+                "en": "Only from index",
+                "es": "Sólo desde el índice"
+              },
+              "help": {
+                "en": "0: always. Otherwise it takes its turn only when the index reaches this, on its own scale (European: 40 is moderate, 60 poor; US: 100 is unhealthy for sensitive groups).",
+                "es": "0: siempre. Si no, sólo sale cuando el índice llega a esto, en su escala (europeo: 40 es regular, 60 desfavorable; EE. UU.: 100 es dañina para grupos sensibles)."
+              }
+            },
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 500
+          },
+          "showPollen": {
+            "title": "Show pollen",
+            "default": true,
+            "x-ui": {
+              "label": {
+                "en": "Show pollen",
+                "es": "Mostrar el polen"
+              }
+            },
+            "type": "boolean"
+          },
+          "latitude": {
+            "title": "Latitude",
+            "description": "Leave latitude and longitude at 0 to use the place in Settings.",
+            "default": 0,
+            "x-ui": {
+              "label": {
+                "en": "Latitude",
+                "es": "Latitud"
+              },
+              "help": {
+                "en": "Leave latitude and longitude at 0 to use the place in Settings.",
+                "es": "Con latitud y longitud a 0 se usa el lugar de los ajustes."
+              },
+              "advanced": true,
+              "unit": "°",
+              "step": 0.0001
+            },
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "title": "Longitude",
+            "default": 0,
+            "x-ui": {
+              "label": {
+                "en": "Longitude",
+                "es": "Longitud"
+              },
+              "advanced": true,
+              "unit": "°",
+              "step": 0.0001
+            },
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          }
+        }
+      },
+      "screenshot": "docs/airquality.png",
+      "animated": false,
+      "urgent": false
+    },
+    {
+      "type": "mirror/earthquakes",
+      "name": {
+        "en": "Earthquakes nearby",
+        "es": "Terremotos cercanos"
+      },
+      "description": {
+        "en": "Recent earthquakes around you (EMSC) on a polar map, with magnitude, place and time. Hidden when there are none (you can change that).",
+        "es": "Los terremotos recientes a tu alrededor (EMSC) en un mapa polar, con magnitud, lugar y hora. Se oculta si no hay ninguno (se puede cambiar)."
+      },
+      "icon": "activity",
+      "category": "info",
+      "tags": [
+        "magicmirror",
+        "seismic"
+      ],
+      "size": {
+        "min": {
+          "w": 280,
+          "h": 140
+        },
+        "preferred": {
+          "w": 600,
+          "h": 300
+        }
+      },
+      "chrome": "card",
+      "sources": [],
+      "options": {
+        "default": {
+          "radiusKm": 150,
+          "days": 30,
+          "minMagnitude": 1.5,
+          "rows": 4,
+          "latitude": 0,
+          "longitude": 0
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "radiusKm": {
+            "title": "Radius",
+            "default": 150,
+            "x-ui": {
+              "label": {
+                "en": "Radius",
+                "es": "Radio"
+              },
+              "unit": "km",
+              "step": 10
+            },
+            "type": "integer",
+            "minimum": 20,
+            "maximum": 2000
+          },
+          "days": {
+            "title": "Days back",
+            "default": 30,
+            "x-ui": {
+              "label": {
+                "en": "Days back",
+                "es": "Días hacia atrás"
+              },
+              "unit": "d"
+            },
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 365
+          },
+          "minMagnitude": {
+            "title": "Minimum magnitude",
+            "default": 1.5,
+            "x-ui": {
+              "label": {
+                "en": "Minimum magnitude",
+                "es": "Magnitud mínima"
+              },
+              "step": 0.1
+            },
+            "type": "number",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "rows": {
+            "title": "Rows",
+            "description": "0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in \"+N more\".",
+            "default": 4,
+            "x-ui": {
+              "label": {
+                "en": "Rows",
+                "es": "Filas"
+              },
+              "help": {
+                "en": "0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in \"+N more\".",
+                "es": "0 = las que quepan. Con un número se ven esas, en filas de un tamaño legible (menos si la tesela no da para ellas); el resto se cuenta en «+N más»."
+              }
+            },
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30
+          },
+          "latitude": {
+            "title": "Latitude",
+            "description": "Leave latitude and longitude at 0 to use the place in Settings.",
+            "default": 0,
+            "x-ui": {
+              "label": {
+                "en": "Latitude",
+                "es": "Latitud"
+              },
+              "help": {
+                "en": "Leave latitude and longitude at 0 to use the place in Settings.",
+                "es": "Con latitud y longitud a 0 se usa el lugar de los ajustes."
+              },
+              "advanced": true,
+              "unit": "°",
+              "step": 0.0001
+            },
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "title": "Longitude",
+            "default": 0,
+            "x-ui": {
+              "label": {
+                "en": "Longitude",
+                "es": "Longitud"
+              },
+              "advanced": true,
+              "unit": "°",
+              "step": 0.0001
+            },
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          }
+        }
+      },
+      "screenshot": "docs/earthquakes.png",
+      "animated": false,
+      "urgent": false
+    },
+    {
+      "type": "mirror/rainmap",
+      "name": {
+        "en": "Rain radar",
+        "es": "Radar de lluvia"
+      },
+      "description": {
+        "en": "Latest rain radar (RainViewer) over a dark OpenStreetMap map, home in the centre. By default only shows while it rains nearby.",
+        "es": "El último radar de lluvia (RainViewer) sobre un mapa oscuro de OpenStreetMap, con casa en el centro. Por defecto sólo sale si llueve cerca."
+      },
+      "icon": "cloud-rain",
+      "category": "info",
+      "tags": [
+        "magicmirror",
+        "weather",
+        "radar",
+        "map"
+      ],
+      "size": {
+        "min": {
+          "w": 200,
+          "h": 140
+        },
+        "preferred": {
+          "w": 600,
+          "h": 440
+        }
+      },
+      "chrome": "card",
+      "sources": [],
+      "options": {
+        "default": {
+          "onlyWhenRaining": true,
+          "latitude": 0,
+          "longitude": 0
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "onlyWhenRaining": {
+            "title": "Only while it rains nearby",
+            "default": true,
+            "x-ui": {
+              "label": {
+                "en": "Only while it rains nearby",
+                "es": "Sólo si llueve cerca"
+              }
+            },
+            "type": "boolean"
+          },
+          "latitude": {
+            "title": "Latitude",
+            "description": "Leave latitude and longitude at 0 to use the place in Settings.",
+            "default": 0,
+            "x-ui": {
+              "label": {
+                "en": "Latitude",
+                "es": "Latitud"
+              },
+              "help": {
+                "en": "Leave latitude and longitude at 0 to use the place in Settings.",
+                "es": "Con latitud y longitud a 0 se usa el lugar de los ajustes."
+              },
+              "advanced": true,
+              "unit": "°",
+              "step": 0.0001
+            },
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "title": "Longitude",
+            "default": 0,
+            "x-ui": {
+              "label": {
+                "en": "Longitude",
+                "es": "Longitud"
+              },
+              "advanced": true,
+              "unit": "°",
+              "step": 0.0001
+            },
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          }
+        }
+      },
+      "screenshot": "docs/rainmap.png",
+      "animated": false,
+      "urgent": false
+    },
+    {
+      "type": "mirror/trafficmap",
+      "name": {
+        "en": "Traffic map",
+        "es": "Mapa de tráfico"
+      },
+      "description": {
+        "en": "Live traffic flow around your place on a dark TomTom map.",
+        "es": "Tráfico en tiempo real alrededor de tu ubicación sobre un mapa oscuro de TomTom."
+      },
+      "icon": "car",
+      "category": "info",
+      "tags": [
+        "traffic",
+        "map",
+        "roads"
+      ],
+      "size": {
+        "min": {
+          "w": 200,
+          "h": 140
+        },
+        "preferred": {
+          "w": 600,
+          "h": 440
+        }
+      },
+      "chrome": "card",
+      "sources": [],
+      "options": {
+        "default": {
+          "apiKey": "",
+          "zoom": 12,
+          "latitude": 0,
+          "longitude": 0
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "title": "TomTom API key",
+            "description": "Create a free account at tomtom.com and enable Map Display and Traffic APIs. Secret: leave it empty (or a placeholder such as \"<token>\"). Kiosko keeps the value it already has, or asks for it in the editor.",
+            "default": "",
+            "x-ui": {
+              "label": {
+                "en": "TomTom API key",
+                "es": "Clave API de TomTom"
+              },
+              "help": {
+                "en": "Create a free account at tomtom.com and enable Map Display and Traffic APIs.",
+                "es": "Crea una cuenta gratuita en tomtom.com y habilita las API Map Display y Traffic."
+              },
+              "secret": true
+            },
+            "x-secret": true,
+            "type": "string"
+          },
+          "zoom": {
+            "title": "Zoom",
+            "description": "Higher numbers show a smaller area in more detail.",
+            "default": 12,
+            "x-ui": {
+              "label": {
+                "en": "Zoom",
+                "es": "Zoom"
+              },
+              "help": {
+                "en": "Higher numbers show a smaller area in more detail.",
+                "es": "Un número mayor muestra una zona más pequeña con más detalle."
+              }
+            },
+            "type": "integer",
+            "minimum": 8,
+            "maximum": 16
+          },
+          "latitude": {
+            "title": "Latitude",
+            "description": "Leave latitude and longitude at 0 to use the place in Settings.",
+            "default": 0,
+            "x-ui": {
+              "label": {
+                "en": "Latitude",
+                "es": "Latitud"
+              },
+              "help": {
+                "en": "Leave latitude and longitude at 0 to use the place in Settings.",
+                "es": "Con latitud y longitud a 0 se usa el lugar de los ajustes."
+              },
+              "advanced": true,
+              "unit": "°",
+              "step": 0.0001
+            },
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "title": "Longitude",
+            "default": 0,
+            "x-ui": {
+              "label": {
+                "en": "Longitude",
+                "es": "Longitud"
+              },
+              "advanced": true,
+              "unit": "°",
+              "step": 0.0001
+            },
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          }
+        }
+      },
+      "screenshot": "docs/trafficmap.png",
+      "animated": false,
+      "urgent": false
+    }
+  ],
+  "sources": [],
+  "interludes": [],
+  "templates": []
+}
