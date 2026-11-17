@@ -183,9 +183,11 @@ export const airquality = defineWidget({
     }
 
     // Stacked: everything scales from one unit (reference layout 368 × 290).
-    const k1 = Math.min(box.w / 368, box.h / 290);
+    // In units of k the content is ~305 tall with the pollen row and ~210 without
+    // (index, gases, their names and µg/m³ under them): scale to that, or it hangs out of the box.
+    const k1 = Math.min(box.w / 368, box.h / 305);
     const withPollen = options.showPollen && k1 >= 0.6;
-    const k = clamp(withPollen ? k1 : Math.min(box.w / 368, box.h / 200), 0.35, 1.6);
+    const k = clamp(withPollen ? k1 : Math.min(box.w / 368, box.h / 210), 0.35, 1.6);
     const big = Math.round(100 * k);
     const top = box.y + big * 0.86;
     const w = kit.drawTracked(g, String(data.aqi), box.x, top, { size: big, family: fonts.sansBold, color: col });
