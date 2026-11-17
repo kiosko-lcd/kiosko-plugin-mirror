@@ -44,6 +44,39 @@ const DEMO: Ephemeris[] = [
   { year: 1940, text: 'Franklin D. Roosevelt becomes the first president of the United States to be elected to a third term.' },
 ];
 
+/** Layouts already worked out: the same fact in the same space paints many times before it changes. */
+const layouts = new Map<string, { size: number; lines: string[] }>();
+
+/**
+ * The largest size (from `start` down to 11) at which `text` fits `w` × `room`
+ * whole, and its lines, by halving the range (a smaller size always fits at
+ * least as much): about five wraps instead of one per size, and none when the
+ * same text was laid out in the same space before.
+ */
+function layout(text: string, w: number, room: number, start: number, family: string, wrap: (size: number, maxLines: number) => string[]): { size: number; lines: string[] } {
+  const key = `${family}|${w}|${room}|${start}|${text}`;
+  const hit = layouts.get(key);
+  if (hit) return hit;
+  const at = (sz: number) => wrap(sz, Math.max(1, Math.floor(room / (sz * 1.22))));
+  const fits = (l: string[]) => !l.at(-1)?.endsWith('…');
+  let lo = 11, hi = Math.max(11, start);
+  let lines = at(lo);
+  if (fits(lines)) {
+    while (lo < hi) {
+      const mid = Math.ceil((lo + hi) / 2);
+      const l = at(mid);
+      if (fits(l)) {
+        lo = mid;
+        lines = l;
+      } else hi = mid - 1;
+    }
+  }
+  const out = { size: lo, lines };
+  if (layouts.size > 200) layouts.clear();
+  layouts.set(key, out);
+  return out;
+}
+
 export const onthisday = defineWidget({
   id: 'onthisday',
   name: { en: 'On this day', es: 'Tal día como hoy' },
@@ -84,13 +117,7 @@ export const onthisday = defineWidget({
     }
     const top = box.y + yearSize * 1.25;
     const room = box.y + box.h - top;
-    // The largest size at which the whole text fits the rest of the card.
-    let size = Math.round(clamp(yearSize * 0.68, 12, 42));
-    let lines: string[] = [];
-    for (; size >= 11; size -= 1) {
-      lines = kit.wrapLines(g, e.text, box.w, Math.max(1, Math.floor(room / (size * 1.22))), { size, family: fonts.sans });
-      if (!lines.at(-1)?.endsWith('…')) break;
-    }
+    const { size, lines } = layout(e.text, box.w, room, Math.round(clamp(yearSize * 0.68, 12, 42)), fonts.sans, (sz, max) => kit.wrapLines(g, e.text, box.w, max, { size: sz, family: fonts.sans }));
     lines.forEach((l, i) => kit.drawTracked(g, l, box.x, top + size * 0.92 + i * size * 1.22, { size, family: fonts.sans, color: colors.ink }));
   },
   demo: ({ now }) => {
