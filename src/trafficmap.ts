@@ -56,12 +56,13 @@ function drawSampleTraffic(g: Graphics, box: Box, kit: RenderContext<unknown, un
 
 export const trafficmap = defineWidget({
   id: 'trafficmap',
-  name: { en: 'Traffic map', es: 'Mapa de tráfico', 'zh-Hant': '交通地圖', 'zh-Hans': '路况地图' },
+  name: { en: 'Traffic map', es: 'Mapa de tráfico', 'zh-Hant': '交通地圖', 'zh-Hans': '路况地图', de: 'Verkehrskarte' },
   description: {
     en: 'Live traffic flow around your place on a dark TomTom map.',
     es: 'Tráfico en tiempo real alrededor de tu ubicación sobre un mapa oscuro de TomTom.',
     'zh-Hant': '在深色的 TomTom 地圖上顯示你所在地周圍的即時車流。',
     'zh-Hans': '在深色的 TomTom 地图上显示你所在地周围的实时路况。',
+    de: 'Der Verkehrsfluss rund um deinen Standort live auf einer dunklen TomTom-Karte.',
   },
   icon: 'car',
   category: 'info',
@@ -70,13 +71,13 @@ export const trafficmap = defineWidget({
   options: t.object({
     apiKey: t.string({
       default: '', secret: true,
-      label: { en: 'TomTom API key', es: 'Clave API de TomTom', 'zh-Hant': 'TomTom API 金鑰', 'zh-Hans': 'TomTom API 密钥' },
-      help: { en: 'Create a free account at tomtom.com and enable Map Display and Traffic APIs.', es: 'Crea una cuenta gratuita en tomtom.com y habilita las API Map Display y Traffic.', 'zh-Hant': '在 tomtom.com 建立免費帳號，並啟用 Map Display 和 Traffic API。', 'zh-Hans': '在 tomtom.com 注册免费账号，并启用 Map Display 和 Traffic API。' },
+      label: { en: 'TomTom API key', es: 'Clave API de TomTom', 'zh-Hant': 'TomTom API 金鑰', 'zh-Hans': 'TomTom API 密钥', de: 'TomTom-API-Schlüssel' },
+      help: { en: 'Create a free account at tomtom.com and enable Map Display and Traffic APIs.', es: 'Crea una cuenta gratuita en tomtom.com y habilita las API Map Display y Traffic.', 'zh-Hant': '在 tomtom.com 建立免費帳號，並啟用 Map Display 和 Traffic API。', 'zh-Hans': '在 tomtom.com 注册免费账号，并启用 Map Display 和 Traffic API。', de: 'Lege ein kostenloses Konto auf tomtom.com an und aktiviere die APIs Map Display und Traffic.' },
     }),
     zoom: t.integer({
       default: 12, min: 8, max: 16,
-      label: { en: 'Zoom', es: 'Zoom', 'zh-Hant': '縮放', 'zh-Hans': '缩放' },
-      help: { en: 'Higher numbers show a smaller area in more detail.', es: 'Un número mayor muestra una zona más pequeña con más detalle.', 'zh-Hant': '數字越大，顯示的範圍越小、細節越多。', 'zh-Hans': '数字越大，显示的范围越小、细节越多。' },
+      label: { en: 'Zoom', es: 'Zoom', 'zh-Hant': '縮放', 'zh-Hans': '缩放', de: 'Zoom' },
+      help: { en: 'Higher numbers show a smaller area in more detail.', es: 'Un número mayor muestra una zona más pequeña con más detalle.', 'zh-Hant': '數字越大，顯示的範圍越小、細節越多。', 'zh-Hans': '数字越大，显示的范围越小、细节越多。', de: 'Höhere Zahlen zeigen einen kleineren Bereich mit mehr Details.' },
     }),
     ...placeOptions(),
   }),
@@ -91,6 +92,7 @@ export const trafficmap = defineWidget({
         es: 'Pon una clave de API de TomTom en las opciones del mapa de tráfico',
         'zh-Hant': '請在交通地圖的選項中設定 TomTom API 金鑰',
         'zh-Hans': '请在路况地图的选项中设置 TomTom API 密钥',
+        de: 'Lege einen TomTom-API-Schlüssel in den Optionen der Verkehrskarte fest',
       });
     }
     if (!Number.isFinite(at.latitude) || !Number.isFinite(at.longitude) || Math.abs(at.latitude) > 90 || Math.abs(at.longitude) > 180) {
@@ -99,6 +101,7 @@ export const trafficmap = defineWidget({
         es: 'Coordenadas del mapa de tráfico no válidas',
         'zh-Hant': '交通地圖的座標無效',
         'zh-Hans': '路况地图的坐标无效',
+        de: 'Ungültige Koordinaten für die Verkehrskarte',
       });
     }
 
@@ -150,7 +153,7 @@ export const trafficmap = defineWidget({
     const creditSize = Math.round(clamp(size * 0.55, 9, 13));
     g.fillStyle = 'rgba(0,0,0,0.70)';
     g.fillRect(box.x, box.y + box.h - size - creditSize - 12, box.w, size + creditSize + 12);
-    kit.drawTracked(g, `${tr({ en: 'traffic', es: 'tráfico', 'zh-Hant': '交通', 'zh-Hans': '路况' })} ${fmt.time(data.time)}`, box.x + 8, box.y + box.h - creditSize - 8, { size, family: theme.fonts.mono, color: '#E6EDF5' });
+    kit.drawTracked(g, `${tr({ en: 'traffic', es: 'tráfico', 'zh-Hant': '交通', 'zh-Hans': '路况', de: 'Verkehr' })} ${fmt.time(data.time)}`, box.x + 8, box.y + box.h - creditSize - 8, { size, family: theme.fonts.mono, color: '#E6EDF5' });
     kit.drawTracked(g, data.credit, box.x + 8, box.y + box.h - 4, { size: creditSize, family: theme.fonts.sans, color: '#E6EDF5' });
   },
   demo: ({ now }) => ({ data: { time: now, credit: '©TomTom, ©OpenStreetMap' } satisfies TrafficData }),

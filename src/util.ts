@@ -20,6 +20,7 @@ export const NO_PLACE = {
   es: 'Sin coordenadas: pon tu ubicación en Ajustes, o latitud y longitud en las opciones de la tarjeta',
   'zh-Hant': '沒有座標：請在「設定」中設定你的位置，或在小工具選項中填入緯度和經度',
   'zh-Hans': '没有坐标：请在“设置”中设置你的位置，或在小组件选项中填写纬度和经度',
+  de: 'Keine Koordinaten: Lege deinen Standort in den Einstellungen fest oder Breiten- und Längengrad in den Optionen der Karte',
 } satisfies Localized;
 
 /** The error for a card with no place to look at: the user reads it in their language. */
