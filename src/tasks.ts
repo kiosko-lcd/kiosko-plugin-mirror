@@ -13,7 +13,7 @@
 import { execFile } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
-import { defineWidget, drawEmpty, drawMore, listLayout, listOptions, moreHeight, moreLabel, t, type Box, type Graphics, type RenderContext } from '@kiosko/sdk';
+import { defineWidget, drawEmpty, drawMore, listLayout, listOptions, localize, moreHeight, moreLabel, t, type Box, type Graphics, type Localized, type RenderContext } from '@kiosko/sdk';
 import { clamp, dayKey, expandHome } from './util.ts';
 
 const execFileAsync = promisify(execFile);
@@ -110,18 +110,22 @@ export function sortTasks(list: TaskItem[]): TaskItem[] {
   return [...list].sort((a, b) => rank(a) - rank(b) || (a.time ?? '').localeCompare(b.time ?? ''));
 }
 
-const DEMO: TasksData = {
-  today: [
-    { kind: 'meeting', text: 'Team stand-up', time: '11:30' },
-    { kind: 'issue', text: '#214 Login button misaligned on mobile', late: true },
-    { kind: 'task', text: 'Review the quarterly budget' },
-    { kind: 'task', text: 'Call the dentist' },
-  ],
-  tomorrow: [
-    { kind: 'issue', text: '#231 Update the onboarding docs' },
-    { kind: 'task', text: 'Buy a birthday present' },
-  ],
-};
+/** Sample tasks for the gallery and the editor, in the user's language. */
+export function demoTasks(locale = 'en'): TasksData {
+  const tr = (text: Localized) => localize(text, locale);
+  return {
+    today: [
+      { kind: 'meeting', text: tr({ en: 'Team stand-up', es: 'Reunión diaria', de: 'Team-Stand-up', 'zh-Hant': '團隊站立會議', 'zh-Hans': '团队站会' }), time: '11:30' },
+      { kind: 'issue', text: tr({ en: '#214 Login button misaligned on mobile', es: '#214 Botón de acceso descolocado en el móvil', de: '#214 Login-Button auf dem Handy verrutscht', 'zh-Hant': '#214 手機版登入按鈕跑版', 'zh-Hans': '#214 移动端登录按钮错位' }), late: true },
+      { kind: 'task', text: tr({ en: 'Review the quarterly budget', es: 'Revisar el presupuesto trimestral', de: 'Quartalsbudget prüfen', 'zh-Hant': '檢查季度預算', 'zh-Hans': '审核季度预算' }) },
+      { kind: 'task', text: tr({ en: 'Call the dentist', es: 'Llamar al dentista', de: 'Zahnarzt anrufen', 'zh-Hant': '打電話給牙醫', 'zh-Hans': '给牙医打电话' }) },
+    ],
+    tomorrow: [
+      { kind: 'issue', text: tr({ en: '#231 Update the onboarding docs', es: '#231 Actualizar la guía de bienvenida', de: '#231 Onboarding-Doku aktualisieren', 'zh-Hant': '#231 更新新人上手文件', 'zh-Hans': '#231 更新新人入职文档' }) },
+      { kind: 'task', text: tr({ en: 'Buy a birthday present', es: 'Comprar un regalo de cumpleaños', de: 'Geburtstagsgeschenk kaufen', 'zh-Hant': '買生日禮物', 'zh-Hans': '买生日礼物' }) },
+    ],
+  };
+}
 
 interface Section {
   title: string;
@@ -292,5 +296,5 @@ export const tasks = defineWidget({
     const used = drawSection(p, today, box, todayRows);
     drawSection(p, tomorrow, { ...box, y: box.y + used }, Math.min(need[1]!, slots - todayRows));
   },
-  demo: () => ({ data: DEMO }),
+  demo: ({ locale }) => ({ data: demoTasks(locale) }),
 });

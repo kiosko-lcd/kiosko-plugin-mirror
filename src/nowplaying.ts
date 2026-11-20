@@ -8,7 +8,7 @@ import { execFile } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { defineWidget, t, type Graphics, type Image, type Theme } from '@kiosko/sdk';
+import { defineWidget, localize, t, type Graphics, type Image, type Theme } from '@kiosko/sdk';
 import { clamp, within } from './util.ts';
 
 const execFileAsync = promisify(execFile);
@@ -211,7 +211,18 @@ export const nowplaying = defineWidget({
       kit.drawTracked(g, kit.truncate(g, label, w, { size: meta, family: fonts.mono }), tx, box.y + box.h - meta * 0.25, { size: meta, family: fonts.mono, color: colors.inkDim, align });
     }
   },
-  demo: ({ now }) => ({
-    data: { player: 'spotify', status: 'Playing', title: 'Midnight Drive', artists: ['The Example Band'], album: 'Neon Roads', artUrl: '', lengthMs: 214_000, positionMs: 83_000, at: now } satisfies NowPlayingData,
+  // A made-up song, named in the user's language.
+  demo: ({ now, locale }) => ({
+    data: {
+      player: 'spotify',
+      status: 'Playing',
+      title: localize({ en: 'Midnight Drive', es: 'Carretera de medianoche', de: 'Mitternachtsfahrt', 'zh-Hant': '午夜兜風', 'zh-Hans': '午夜兜风' }, locale),
+      artists: [localize({ en: 'The Example Band', es: 'La Banda de Ejemplo', de: 'Die Beispielband', 'zh-Hant': '範例樂團', 'zh-Hans': '示例乐队' }, locale)],
+      album: localize({ en: 'Neon Roads', es: 'Calles de neón', de: 'Neonstraßen', 'zh-Hant': '霓虹街道', 'zh-Hans': '霓虹街道' }, locale),
+      artUrl: '',
+      lengthMs: 214_000,
+      positionMs: 83_000,
+      at: now,
+    } satisfies NowPlayingData,
   }),
 });
