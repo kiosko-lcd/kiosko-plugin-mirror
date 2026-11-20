@@ -4,7 +4,7 @@
  * of one: the nearest come first, past ones disappear on their own and
  * yearly ones come back.
  */
-import { defineWidget, drawEmpty, drawMore, listLayout, listOptions, t } from '@kiosko/sdk';
+import { defineWidget, drawEmpty, drawMore, listLayout, listOptions, localize, t, type Localized } from '@kiosko/sdk';
 import { clamp, dayOffset } from './util.ts';
 
 export interface CountdownEvent {
@@ -57,14 +57,15 @@ export function countdownLevel(days: number, o: { warnDays: number; alertDays: n
   return days <= o.alertDays ? 'alert' : days <= o.warnDays ? 'warn' : 'normal';
 }
 
-/** Sample dates relative to `now`, for the gallery: one of them yearly, with a year long gone. */
-export function demoEvents(now: number): CountdownEvent[] {
+/** Sample dates relative to `now`, for the gallery, in the user's language: one of them yearly, with a year long gone. */
+export function demoEvents(now: number, locale = 'en'): CountdownEvent[] {
+  const tr = (text: Localized) => localize(text, locale);
   return [
-    { name: 'Project deadline', date: dayOffset(now, 1) },
-    { name: 'Holidays', date: dayOffset(now, 5) },
-    { name: "Sam's birthday", date: `1990${dayOffset(now, 12).slice(4)}`, yearly: true },
-    { name: 'Linear algebra exam', date: dayOffset(now, 26) },
-    { name: 'Conference talk', date: dayOffset(now, 74) },
+    { name: tr({ en: 'Project deadline', es: 'Entrega del proyecto', de: 'Projektabgabe', 'zh-Hant': '專案截止', 'zh-Hans': '项目截止' }), date: dayOffset(now, 1) },
+    { name: tr({ en: 'Holidays', es: 'Vacaciones', de: 'Urlaub', 'zh-Hant': '休假', 'zh-Hans': '假期' }), date: dayOffset(now, 5) },
+    { name: tr({ en: "Sam's birthday", es: 'Cumpleaños de Sam', de: 'Sams Geburtstag', 'zh-Hant': '小美的生日', 'zh-Hans': '小美的生日' }), date: `1990${dayOffset(now, 12).slice(4)}`, yearly: true },
+    { name: tr({ en: 'Linear algebra exam', es: 'Examen de álgebra lineal', de: 'Klausur Lineare Algebra', 'zh-Hant': '線性代數考試', 'zh-Hans': '线性代数考试' }), date: dayOffset(now, 26) },
+    { name: tr({ en: 'Conference talk', es: 'Charla en el congreso', de: 'Konferenzvortrag', 'zh-Hant': '研討會演講', 'zh-Hans': '大会演讲' }), date: dayOffset(now, 74) },
   ];
 }
 
@@ -100,7 +101,7 @@ export const countdown = defineWidget<typeof OPTIONS, CountdownEvent[]>({
     const { box, options, data, now, theme, kit, t: tr } = ctx;
     const { colors, fonts } = theme;
     // Unconfigured in the editor: the sample dates (`data` only exists there).
-    const list = upcoming(eventsOf(options, data ?? (ctx.preview ? demoEvents(now) : undefined)), now);
+    const list = upcoming(eventsOf(options, data ?? (ctx.preview ? demoEvents(now, ctx.locale) : undefined)), now);
     if (!list.length) return drawEmpty(g, ctx, tr({ en: 'Nothing coming up', es: 'Nada a la vista', 'zh-Hant': '近期沒有事項', 'zh-Hans': '近期没有事项', de: 'Nichts in Sicht' }));
     const plan = listLayout(box, list.length, options, { sizes: { 'one-line': { min: 24, max: 76 } } });
     const rowH = plan.rowH;
@@ -133,5 +134,5 @@ export const countdown = defineWidget<typeof OPTIONS, CountdownEvent[]>({
     drawMore(g, ctx, plan, { indent: nx - box.x });
   },
   // Configured with options only: the sample dates are drawn by `render` in the editor.
-  demo: ({ now }) => ({ data: demoEvents(now) }),
+  demo: ({ now, locale }) => ({ data: demoEvents(now, locale) }),
 });

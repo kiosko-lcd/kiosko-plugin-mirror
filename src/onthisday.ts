@@ -3,7 +3,7 @@
  * anniversaries" (its REST API, no key), in the user's language. One at a
  * time, changing every `changeMs`.
  */
-import { defineWidget, hanScript, t, type BaseContext } from '@kiosko/sdk';
+import { defineWidget, hanScript, localize, t, type BaseContext, type Localized } from '@kiosko/sdk';
 import { clamp, USER_AGENT, within } from './util.ts';
 
 export interface Ephemeris {
@@ -58,10 +58,38 @@ export function yearsAgo(n: number, plural: BaseContext['plural']): string {
   return plural(n, { en: { one: '{n} year ago', other: '{n} years ago' }, es: { one: 'hace {n} año', other: 'hace {n} años' }, 'zh-Hant': { other: '{n} 年前' }, 'zh-Hans': { other: '{n} 年前' }, de: { one: 'vor {n} Jahr', other: 'vor {n} Jahren' } });
 }
 
-const DEMO: Ephemeris[] = [
-  { year: 1605, text: 'The Gunpowder Plot is foiled when Guy Fawkes is arrested in the cellars beneath the House of Lords in London.' },
-  { year: 1872, text: 'Women\'s suffrage campaigner Susan B. Anthony votes in the United States presidential election, for which she is later fined.' },
-  { year: 1940, text: 'Franklin D. Roosevelt becomes the first president of the United States to be elected to a third term.' },
+/** Sample anniversaries (5 November) for the gallery and the editor, in the user's language. */
+const DEMO: { year: number; text: Localized }[] = [
+  {
+    year: 1605,
+    text: {
+      en: 'The Gunpowder Plot is foiled when Guy Fawkes is arrested in the cellars beneath the House of Lords in London.',
+      es: 'Fracasa la Conspiración de la Pólvora: Guy Fawkes es detenido en los sótanos de la Cámara de los Lores, en Londres.',
+      de: 'Der Schießpulverplan scheitert: Guy Fawkes wird in den Kellern unter dem House of Lords in London verhaftet.',
+      'zh-Hant': '火藥陰謀失敗，蓋伊·福克斯在倫敦上議院的地窖中被捕。',
+      'zh-Hans': '火药阴谋败露，盖伊·福克斯在伦敦上议院的地窖中被捕。',
+    },
+  },
+  {
+    year: 1872,
+    text: {
+      en: 'Women\'s suffrage campaigner Susan B. Anthony votes in the United States presidential election, for which she is later fined.',
+      es: 'La sufragista Susan B. Anthony vota en las elecciones presidenciales de Estados Unidos, por lo que más tarde es multada.',
+      de: 'Die Frauenrechtlerin Susan B. Anthony wählt bei der US-Präsidentschaftswahl mit und muss dafür später eine Geldstrafe zahlen.',
+      'zh-Hant': '女性參政運動人士蘇珊·安東尼在美國總統大選中投票，事後遭到罰款。',
+      'zh-Hans': '妇女参政运动活动家苏珊·安东尼在美国总统选举中投票，事后被处以罚款。',
+    },
+  },
+  {
+    year: 1940,
+    text: {
+      en: 'Franklin D. Roosevelt becomes the first president of the United States to be elected to a third term.',
+      es: 'Franklin D. Roosevelt se convierte en el primer presidente de Estados Unidos elegido para un tercer mandato.',
+      de: 'Franklin D. Roosevelt wird als erster Präsident der Vereinigten Staaten für eine dritte Amtszeit gewählt.',
+      'zh-Hant': '富蘭克林·羅斯福成為第一位三度當選的美國總統。',
+      'zh-Hans': '富兰克林·罗斯福成为首位第三次当选的美国总统。',
+    },
+  },
 ];
 
 /** Layouts already worked out: the same fact in the same space paints many times before it changes. */
@@ -142,8 +170,8 @@ export const onthisday = defineWidget({
     const { size, lines } = layout(e.text, box.w, room, Math.round(clamp(yearSize * 0.68, 12, 42)), fonts.sans, (sz, max) => kit.wrapLines(g, e.text, box.w, max, { size: sz, family: fonts.sans }));
     lines.forEach((l, i) => kit.drawTracked(g, l, box.x, top + size * 0.92 + i * size * 1.22, { size, family: fonts.sans, color: colors.ink }));
   },
-  demo: ({ now }) => {
+  demo: ({ now, locale }) => {
     const d = new Date(now);
-    return { data: { day: `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`, items: DEMO } };
+    return { data: { day: `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`, items: DEMO.map((e) => ({ ...e, text: localize(e.text, locale) })) } };
   },
 });
