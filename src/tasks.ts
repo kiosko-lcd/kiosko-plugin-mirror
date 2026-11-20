@@ -150,7 +150,7 @@ function drawSection(p: TaskPainter, s: Section, area: Box, rows: number): numbe
   kit.drawTracked(g, kit.truncate(g, s.title, area.w, { size: small, family: fonts.sans }), area.x, area.y + rowH / 2 + small * 0.45, { size: small, family: fonts.sans, color: colors.inkDim, smallCaps: true, tracking: 1 });
   const itemRows = Math.max(1, rows - 1);
   if (!s.items.length) {
-    kit.drawTracked(g, tr({ en: 'Nothing', es: 'Nada' }), area.x, baseOf(1), { size, family: fonts.sans, color: colors.inkFaint });
+    kit.drawTracked(g, tr({ en: 'Nothing', es: 'Nada', 'zh-Hant': '無', 'zh-Hans': '无' }), area.x, baseOf(1), { size, family: fonts.sans, color: colors.inkFaint });
     return 2 * rowH;
   }
   const fits = s.items.length <= itemRows;
@@ -186,10 +186,12 @@ function drawSection(p: TaskPainter, s: Section, area: Box, rows: number): numbe
 
 export const tasks = defineWidget({
   id: 'tasks',
-  name: { en: 'Today and tomorrow', es: 'Hoy y mañana' },
+  name: { en: 'Today and tomorrow', es: 'Hoy y mañana', 'zh-Hant': '今天與明天', 'zh-Hans': '今天和明天' },
   description: {
     en: 'Your to-dos for today and tomorrow, from a Markdown checklist and, optionally, your GitLab issues.',
     es: 'Lo que tienes para hoy y mañana, de una lista de casillas en Markdown y, si quieres, de tus issues de GitLab.',
+    'zh-Hant': '你今天和明天的待辦事項，來自 Markdown 核取清單，也可加入你的 GitLab 問題。',
+    'zh-Hans': '你今天和明天的待办事项，来自 Markdown 任务清单，也可加入你的 GitLab 议题。',
   },
   icon: 'list-checks',
   category: 'productivity',
@@ -200,15 +202,17 @@ export const tasks = defineWidget({
       default: '~/tasks.md',
       format: 'path',
       risk: 'path',
-      label: { en: 'Checklist file', es: 'Fichero de tareas' },
+      label: { en: 'Checklist file', es: 'Fichero de tareas', 'zh-Hant': '待辦清單檔案', 'zh-Hans': '待办清单文件' },
       help: {
         en: 'Markdown with "- [ ] …" boxes under "## Today" and "## Tomorrow"; "@2026-10-14" dates a box.',
         es: 'Markdown con casillas «- [ ] …» bajo «## Hoy» y «## Mañana»; «@2026-10-14» le pone fecha.',
+        'zh-Hant': 'Markdown 檔，在「## Today」和「## Tomorrow」下放「- [ ] …」核取方塊；「@2026-10-14」可為方塊指定日期。',
+        'zh-Hans': 'Markdown 文件，在“## Today”和“## Tomorrow”下放“- [ ] …”复选框；“@2026-10-14”可为复选框指定日期。',
       },
     }),
-    includeIssues: t.boolean({ label: { en: 'Add my GitLab issues with a due date', es: 'Añadir mis issues de GitLab con fecha' }, help: { en: 'Due today or tomorrow, and every overdue one.', es: 'Las que vencen hoy o mañana, y todas las vencidas.' } }),
-    bin: t.string({ default: 'glab', format: 'path', risk: 'exec', advanced: true, label: { en: 'glab command', es: 'Comando glab' }, help: { en: 'The GitLab CLI, already logged in.', es: 'El CLI de GitLab, con la sesión iniciada.' } }),
-    showTomorrow: t.boolean({ default: true, label: { en: 'Tomorrow too', es: 'También mañana' }, help: { en: 'Off: only today, for small tiles.', es: 'Apagado: sólo hoy, para teselas pequeñas.' } }),
+    includeIssues: t.boolean({ label: { en: 'Add my GitLab issues with a due date', es: 'Añadir mis issues de GitLab con fecha', 'zh-Hant': '加入我有到期日的 GitLab 問題', 'zh-Hans': '添加我有截止日期的 GitLab 议题' }, help: { en: 'Due today or tomorrow, and every overdue one.', es: 'Las que vencen hoy o mañana, y todas las vencidas.', 'zh-Hant': '今天或明天到期的，以及所有逾期的。', 'zh-Hans': '今天或明天到期的，以及所有逾期的。' } }),
+    bin: t.string({ default: 'glab', format: 'path', risk: 'exec', advanced: true, label: { en: 'glab command', es: 'Comando glab', 'zh-Hant': 'glab 指令', 'zh-Hans': 'glab 命令' }, help: { en: 'The GitLab CLI, already logged in.', es: 'El CLI de GitLab, con la sesión iniciada.', 'zh-Hant': 'GitLab CLI，需已登入。', 'zh-Hans': 'GitLab CLI，需已登录。' } }),
+    showTomorrow: t.boolean({ default: true, label: { en: 'Tomorrow too', es: 'También mañana', 'zh-Hant': '也顯示明天', 'zh-Hans': '也显示明天' }, help: { en: 'Off: only today, for small tiles.', es: 'Apagado: sólo hoy, para teselas pequeñas.', 'zh-Hant': '關閉：只顯示今天，適合小方格。', 'zh-Hans': '关闭：只显示今天，适合小格子。' } }),
     ...listOptions(),
   }),
   intervalMs: 10 * 60_000,
@@ -239,10 +243,10 @@ export const tasks = defineWidget({
   render(g, ctx) {
     const { data, box, options, t: tr } = ctx;
     if (!data) return;
-    const today = { title: tr({ en: 'Today', es: 'Hoy' }), items: data.today };
-    const tomorrow = { title: tr({ en: 'Tomorrow', es: 'Mañana' }), items: data.tomorrow };
+    const today = { title: tr({ en: 'Today', es: 'Hoy', 'zh-Hant': '今天', 'zh-Hans': '今天' }), items: data.today };
+    const tomorrow = { title: tr({ en: 'Tomorrow', es: 'Mañana', 'zh-Hant': '明天', 'zh-Hans': '明天' }), items: data.tomorrow };
     const sections = options.showTomorrow ? [today, tomorrow] : [today];
-    if (!sections.some((s) => s.items.length)) return drawEmpty(g, ctx, options.showTomorrow ? tr({ en: 'Nothing for today or tomorrow', es: 'Nada para hoy ni mañana' }) : tr({ en: 'Nothing for today', es: 'Nada para hoy' }));
+    if (!sections.some((s) => s.items.length)) return drawEmpty(g, ctx, options.showTomorrow ? tr({ en: 'Nothing for today or tomorrow', es: 'Nada para hoy ni mañana', 'zh-Hant': '今明兩天沒有事項', 'zh-Hans': '今明两天没有事项' }) : tr({ en: 'Nothing for today', es: 'Nada para hoy', 'zh-Hant': '今天沒有事項', 'zh-Hans': '今天没有事项' }));
     // Wide and short tiles get today and tomorrow side by side; otherwise
     // today on top and tomorrow below, full width (in two narrow columns the
     // texts were left with a dozen letters).

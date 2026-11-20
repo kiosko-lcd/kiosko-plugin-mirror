@@ -3,7 +3,7 @@
  * timeouts and number formats.
  */
 import { homedir } from 'node:os';
-import { locationOptions } from '@kiosko/sdk';
+import { locationOptions, PluginError, type Localized } from '@kiosko/sdk';
 
 /**
  * Latitude and longitude override fields (advanced; 0, 0 = the place in
@@ -15,7 +15,15 @@ export function placeOptions() {
   return { latitude, longitude };
 }
 
-export const NO_PLACE = 'no coordinates: set your place in Settings, or latitude and longitude in the card options';
+export const NO_PLACE = {
+  en: 'No coordinates: set your place in Settings, or latitude and longitude in the card options',
+  es: 'Sin coordenadas: pon tu ubicación en Ajustes, o latitud y longitud en las opciones de la tarjeta',
+  'zh-Hant': '沒有座標：請在「設定」中設定你的位置，或在小工具選項中填入緯度和經度',
+  'zh-Hans': '没有坐标：请在“设置”中设置你的位置，或在小组件选项中填写纬度和经度',
+} satisfies Localized;
+
+/** The error for a card with no place to look at: the user reads it in their language. */
+export const noPlace = () => new PluginError(NO_PLACE);
 
 /** The widget's abort signal plus a timeout, for one network request. */
 export const within = (signal: AbortSignal, ms: number): AbortSignal => AbortSignal.any([signal, AbortSignal.timeout(ms)]);

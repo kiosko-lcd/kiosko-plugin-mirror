@@ -13,7 +13,7 @@ import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { defineWidget, placeOf, t, type Box, type Canvas, type Graphics, type RenderContext } from '@kiosko/sdk';
-import { clamp, NO_PLACE, placeOptions, USER_AGENT, within } from './util.ts';
+import { clamp, noPlace, placeOptions, USER_AGENT, within } from './util.ts';
 
 /** Size of the composed map; it's drawn cropped to the card's box. */
 const OUT_W = 660, OUT_H = 400;
@@ -117,23 +117,25 @@ function drawSampleRadar(g: Graphics, box: Box, kit: RenderContext<unknown, unkn
 
 export const rainmap = defineWidget({
   id: 'rainmap',
-  name: { en: 'Rain radar', es: 'Radar de lluvia' },
+  name: { en: 'Rain radar', es: 'Radar de lluvia', 'zh-Hant': '降雨雷達', 'zh-Hans': '降雨雷达' },
   description: {
     en: 'Latest rain radar (RainViewer) over a dark OpenStreetMap map, home in the centre. By default only shows while it rains nearby.',
     es: 'El último radar de lluvia (RainViewer) sobre un mapa oscuro de OpenStreetMap, con casa en el centro. Por defecto sólo sale si llueve cerca.',
+    'zh-Hant': '最新的降雨雷達（RainViewer），疊在深色的 OpenStreetMap 地圖上，家在中央。預設只在附近下雨時顯示。',
+    'zh-Hans': '最新的降雨雷达（RainViewer），叠加在深色的 OpenStreetMap 地图上，家在中心。默认只在附近下雨时显示。',
   },
   icon: 'cloud-rain',
   category: 'info',
   tags: ['magicmirror', 'weather', 'radar', 'map'],
   size: { min: { w: 200, h: 140 }, preferred: { w: 600, h: 440 } },
   options: t.object({
-    onlyWhenRaining: t.boolean({ default: true, label: { en: 'Only while it rains nearby', es: 'Sólo si llueve cerca' } }),
+    onlyWhenRaining: t.boolean({ default: true, label: { en: 'Only while it rains nearby', es: 'Sólo si llueve cerca', 'zh-Hant': '只在附近下雨時', 'zh-Hans': '仅在附近下雨时' } }),
     ...placeOptions(),
   }),
   intervalMs: 10 * 60_000,
   async fetch({ options, location, canvas, cacheDir, dataDir, signal }): Promise<RainData> {
     const at = placeOf(options, location);
-    if (!at) throw new Error(NO_PLACE);
+    if (!at) throw noPlace();
     const res = await fetch('https://api.rainviewer.com/public/weather-maps.json', { headers: { 'User-Agent': USER_AGENT }, signal: within(signal, 10_000) });
     if (!res.ok) throw new Error(`RainViewer HTTP ${res.status}`);
     const maps = (await res.json()) as { host?: string; radar?: { past?: { time: number; path: string }[] } };
@@ -170,7 +172,7 @@ export const rainmap = defineWidget({
     return { img: out, time: frame.time * 1000, rain };
   },
   visible: ({ options, data }) => Boolean(data && (!options.onlyWhenRaining || data.rain > 0.0005)),
-  render(g, { data, box, theme, kit, fmt }) {
+  render(g, { data, box, theme, kit, fmt, t: tr }) {
     if (!data) return;
     const { colors, fonts } = theme;
     if (data.img) {
@@ -189,7 +191,7 @@ export const rainmap = defineWidget({
     g.stroke();
     const s = Math.round(clamp(box.h * 0.07, 11, 24));
     const credit = Math.round(clamp(s * 0.55, 9, 13));
-    const label = `radar ${fmt.time(data.time)}`;
+    const label = `${tr({ en: 'radar', es: 'radar', 'zh-Hant': '雷達', 'zh-Hans': '雷达' })} ${fmt.time(data.time)}`;
     // The map is always dark (whatever the theme): light captions on a dark band.
     g.fillStyle = 'rgba(0,0,0,0.55)';
     g.fillRect(box.x, box.y + box.h - s * 1.5, box.w, s * 1.5);

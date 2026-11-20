@@ -3,7 +3,7 @@
  * anniversaries" (its REST API, no key), in the user's language. One at a
  * time, changing every `changeMs`.
  */
-import { defineWidget, t, type Localized } from '@kiosko/sdk';
+import { defineWidget, hanScript, t, type BaseContext } from '@kiosko/sdk';
 import { clamp, USER_AGENT, within } from './util.ts';
 
 export interface Ephemeris {
@@ -33,9 +33,29 @@ export function wikiLang(option: string, locale: string): string {
   return /^[a-z]{2,3}$/.test(l) ? l : 'en';
 }
 
+/**
+ * The script to ask zh.wikipedia.org for (`Accept-Language`), which writes
+ * every article in both and converts on the way out: Traditional as in
+ * Taiwan or Hong Kong, or Simplified, by the user's locale. Undefined for
+ * other editions, or a Chinese edition asked for by a reader of neither.
+ */
+export function wikiVariant(lang: string, locale: string): string | undefined {
+  if (lang !== 'zh') return undefined;
+  switch (hanScript(locale)) {
+    case 'Hant':
+      return 'zh-tw';
+    case 'Hant-HK':
+      return 'zh-hk';
+    case 'Hans':
+      return 'zh-cn';
+    default:
+      return undefined;
+  }
+}
+
 /** "53 years ago" / "hace 53 años". */
-export function yearsAgo(n: number, tr: (text: Localized) => string): string {
-  return n === 1 ? tr({ en: '1 year ago', es: 'hace 1 año' }) : tr({ en: `${n} years ago`, es: `hace ${n} años` });
+export function yearsAgo(n: number, plural: BaseContext['plural']): string {
+  return plural(n, { en: { one: '{n} year ago', other: '{n} years ago' }, es: { one: 'hace {n} año', other: 'hace {n} años' }, 'zh-Hant': { other: '{n} 年前' }, 'zh-Hans': { other: '{n} 年前' } });
 }
 
 const DEMO: Ephemeris[] = [
@@ -79,23 +99,25 @@ function layout(text: string, w: number, room: number, start: number, family: st
 
 export const onthisday = defineWidget({
   id: 'onthisday',
-  name: { en: 'On this day', es: 'Tal día como hoy' },
-  description: { en: 'Selected anniversaries of today from Wikipedia, one at a time.', es: 'Efemérides de hoy seleccionadas por la Wikipedia, una a una.' },
+  name: { en: 'On this day', es: 'Tal día como hoy', 'zh-Hant': '歷史上的今天', 'zh-Hans': '历史上的今天' },
+  description: { en: 'Selected anniversaries of today from Wikipedia, one at a time.', es: 'Efemérides de hoy seleccionadas por la Wikipedia, una a una.', 'zh-Hant': '維基百科精選的今日歷史事件，一次一則。', 'zh-Hans': '维基百科精选的历史上的今天，一次一条。' },
   icon: 'landmark',
   category: 'info',
   tags: ['magicmirror', 'history', 'wikipedia'],
   size: { min: { w: 240, h: 120 }, preferred: { w: 600, h: 220 } },
   options: t.object({
-    lang: t.string({ placeholder: 'en', maxLength: 3, label: { en: 'Wikipedia language', es: 'Idioma de la Wikipedia' }, help: { en: 'A code such as en, es, de; empty = yours. Not every edition has this feed.', es: 'Un código como es, en, de; vacío = el tuyo. No todas las ediciones tienen esta sección.' } }),
-    changeMs: t.duration({ default: 10 * 60_000, min: 60_000, label: { en: 'Change every', es: 'Cambia cada' } }),
+    lang: t.string({ placeholder: 'en', maxLength: 3, label: { en: 'Wikipedia language', es: 'Idioma de la Wikipedia', 'zh-Hant': '維基百科語言', 'zh-Hans': '维基百科语言' }, help: { en: 'A code such as en, es, de; empty = yours. Not every edition has this feed.', es: 'Un código como es, en, de; vacío = el tuyo. No todas las ediciones tienen esta sección.', 'zh-Hant': '語言代碼，例如 en、es、de；留空 = 你的語言。並非每個版本都有這個欄目。', 'zh-Hans': '语言代码，例如 en、es、de；留空 = 你的语言。并非每个版本都有这个栏目。' } }),
+    changeMs: t.duration({ default: 10 * 60_000, min: 60_000, label: { en: 'Change every', es: 'Cambia cada', 'zh-Hant': '更換間隔', 'zh-Hans': '切换间隔' } }),
   }),
   intervalMs: 3 * 3600_000,
   redraw: 'minute',
   async fetch({ options, now, locale, signal }): Promise<OnThisDayData> {
     const d = new Date(now);
     const mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
-    const res = await fetch(`https://${wikiLang(options.lang, locale)}.wikipedia.org/api/rest_v1/feed/onthisday/selected/${mm}/${dd}`, {
-      headers: { 'User-Agent': USER_AGENT },
+    const lang = wikiLang(options.lang, locale);
+    const variant = wikiVariant(lang, locale);
+    const res = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/feed/onthisday/selected/${mm}/${dd}`, {
+      headers: { 'User-Agent': USER_AGENT, ...(variant ? { 'Accept-Language': variant } : {}) },
       signal: within(signal, 10_000),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -104,7 +126,7 @@ export const onthisday = defineWidget({
     return { day: `${mm}-${dd}`, items };
   },
   visible: ({ data }) => Boolean(data?.items.length),
-  render(g, { options, data, now, box, theme, kit, t: tr }) {
+  render(g, { options, data, now, box, theme, kit, plural }) {
     if (!data?.items.length) return;
     const { colors, fonts } = theme;
     const e = data.items[Math.floor(now / Math.max(60_000, options.changeMs)) % data.items.length]!;
@@ -113,7 +135,7 @@ export const onthisday = defineWidget({
     const ago = new Date(now).getFullYear() - e.year;
     if (ago > 0) {
       const s = Math.round(yearSize * 0.42);
-      kit.drawTracked(g, kit.truncate(g, yearsAgo(ago, tr), box.w - yw - s, { size: s, family: fonts.sans }), box.x + yw + s * 0.6, box.y + yearSize * 0.82, { size: s, family: fonts.sans, color: colors.inkDim });
+      kit.drawTracked(g, kit.truncate(g, yearsAgo(ago, plural), box.w - yw - s, { size: s, family: fonts.sans }), box.x + yw + s * 0.6, box.y + yearSize * 0.82, { size: s, family: fonts.sans, color: colors.inkDim });
     }
     const top = box.y + yearSize * 1.25;
     const room = box.y + box.h - top;

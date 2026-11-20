@@ -71,15 +71,15 @@ export function demoEvents(now: number): CountdownEvent[] {
 const OPTIONS = t.object({
   events: t.list(
     t.object({
-      name: t.string({ label: { en: 'What', es: 'Qué' }, placeholder: 'Holidays' }),
-      date: t.string({ format: 'date', label: { en: 'Date', es: 'Fecha' }, placeholder: '2027-01-25' }),
-      yearly: t.boolean({ label: { en: 'Every year', es: 'Cada año' }, help: { en: 'Birthdays and anniversaries: the year of the date doesn’t matter.', es: 'Cumpleaños y aniversarios: el año de la fecha da igual.' } }),
+      name: t.string({ label: { en: 'What', es: 'Qué', 'zh-Hant': '事項', 'zh-Hans': '事项' }, placeholder: 'Holidays' }),
+      date: t.string({ format: 'date', label: { en: 'Date', es: 'Fecha', 'zh-Hant': '日期', 'zh-Hans': '日期' }, placeholder: '2027-01-25' }),
+      yearly: t.boolean({ label: { en: 'Every year', es: 'Cada año', 'zh-Hant': '每年', 'zh-Hans': '每年' }, help: { en: 'Birthdays and anniversaries: the year of the date doesn’t matter.', es: 'Cumpleaños y aniversarios: el año de la fecha da igual.', 'zh-Hant': '生日和紀念日：日期的年份不影響。', 'zh-Hans': '生日和纪念日：日期中的年份无所谓。' } }),
     }),
-    { label: { en: 'Dates', es: 'Fechas' }, help: { en: 'Past dates hide themselves; yearly ones come back.', es: 'Las fechas pasadas desaparecen solas; las de cada año vuelven.' } },
+    { label: { en: 'Dates', es: 'Fechas', 'zh-Hant': '日期', 'zh-Hans': '日期' }, help: { en: 'Past dates hide themselves; yearly ones come back.', es: 'Las fechas pasadas desaparecen solas; las de cada año vuelven.', 'zh-Hant': '過去的日期會自動隱藏；每年的日期會再次出現。', 'zh-Hans': '过去的日期会自动隐藏；每年的日期会再次出现。' } },
   ),
   ...listOptions({ rows: 4 }),
-  warnDays: t.integer({ default: 7, min: 0, max: 365, unit: 'd', label: { en: 'Amber from (days before)', es: 'Ámbar desde (días antes)' } }),
-  alertDays: t.integer({ default: 1, min: 0, max: 365, unit: 'd', label: { en: 'Red from (days before)', es: 'Rojo desde (días antes)' }, help: { en: '0: only on the day.', es: '0: sólo el mismo día.' } }),
+  warnDays: t.integer({ default: 7, min: 0, max: 365, unit: 'd', label: { en: 'Amber from (days before)', es: 'Ámbar desde (días antes)', 'zh-Hant': '琥珀色起始（提前天數）', 'zh-Hans': '琥珀色起始（提前天数）' } }),
+  alertDays: t.integer({ default: 1, min: 0, max: 365, unit: 'd', label: { en: 'Red from (days before)', es: 'Rojo desde (días antes)', 'zh-Hant': '紅色起始（提前天數）', 'zh-Hans': '红色起始（提前天数）' }, help: { en: '0: only on the day.', es: '0: sólo el mismo día.', 'zh-Hant': '0：只在當天。', 'zh-Hans': '0：仅当天。' } }),
 });
 
 /** The dates to count: the user's, or the sample ones in the editor while there are none. */
@@ -87,8 +87,8 @@ const eventsOf = (options: { events: CountdownEvent[] }, data: CountdownEvent[] 
 
 export const countdown = defineWidget<typeof OPTIONS, CountdownEvent[]>({
   id: 'countdown',
-  name: { en: 'Countdown', es: 'Cuenta atrás' },
-  description: { en: 'Days left until your important dates, nearest first. Birthdays and anniversaries come back every year.', es: 'Los días que faltan para tus fechas importantes, la más cercana primero. Cumpleaños y aniversarios vuelven cada año.' },
+  name: { en: 'Countdown', es: 'Cuenta atrás', 'zh-Hant': '倒數', 'zh-Hans': '倒计时' },
+  description: { en: 'Days left until your important dates, nearest first. Birthdays and anniversaries come back every year.', es: 'Los días que faltan para tus fechas importantes, la más cercana primero. Cumpleaños y aniversarios vuelven cada año.', 'zh-Hant': '距離重要日期還有幾天，最近的排在前面。生日和紀念日每年都會再出現。', 'zh-Hans': '距离重要日期还有几天，最近的排在前面。生日和纪念日每年都会再出现。' },
   icon: 'hourglass',
   category: 'time',
   tags: ['magicmirror', 'dates'],
@@ -101,7 +101,7 @@ export const countdown = defineWidget<typeof OPTIONS, CountdownEvent[]>({
     const { colors, fonts } = theme;
     // Unconfigured in the editor: the sample dates (`data` only exists there).
     const list = upcoming(eventsOf(options, data ?? (ctx.preview ? demoEvents(now) : undefined)), now);
-    if (!list.length) return drawEmpty(g, ctx, tr({ en: 'Nothing coming up', es: 'Nada a la vista' }));
+    if (!list.length) return drawEmpty(g, ctx, tr({ en: 'Nothing coming up', es: 'Nada a la vista', 'zh-Hant': '近期沒有事項', 'zh-Hans': '近期没有事项' }));
     const plan = listLayout(box, list.length, options, { sizes: { 'one-line': { min: 24, max: 76 } } });
     const rowH = plan.rowH;
     const shown = list.slice(0, plan.shown);
@@ -109,7 +109,7 @@ export const countdown = defineWidget<typeof OPTIONS, CountdownEvent[]>({
     const unitSize = Math.round(size * 0.5);
     // The number, right-aligned in its column, as wide as the longest one.
     const numW = Math.max(...shown.map((e) => kit.measureTracked(g, String(e.days), { size, family: fonts.sans })), kit.measureTracked(g, '00', { size, family: fonts.sans }));
-    const daysWord = tr({ en: 'days', es: 'días' });
+    const daysWord = tr({ en: 'days', es: 'días', 'zh-Hant': '天', 'zh-Hans': '天' });
     const unitW = kit.measureTracked(g, daysWord, { size: unitSize, family: fonts.sans });
     const nx = box.x + numW + size * 0.18 + unitW + size * 0.35;
     // One size for every name: the largest at which they all fit (within limits).
@@ -123,7 +123,7 @@ export const countdown = defineWidget<typeof OPTIONS, CountdownEvent[]>({
         kit.drawTracked(g, daysWord, box.x + numW + size * 0.18, base, { size: unitSize, family: fonts.sans, color: colors.inkDim });
       } else {
         // "today" / "tomorrow" take the number's place, in its colour.
-        const word = e.days === 0 ? tr({ en: 'today', es: 'hoy' }) : tr({ en: 'tomorrow', es: 'mañana' });
+        const word = e.days === 0 ? tr({ en: 'today', es: 'hoy', 'zh-Hant': '今天', 'zh-Hans': '今天' }) : tr({ en: 'tomorrow', es: 'mañana', 'zh-Hant': '明天', 'zh-Hans': '明天' });
         const ws = kit.fitSize(g, word, nx - box.x - size * 0.3, { size: Math.round(size * 0.8), family: fonts.sans }, unitSize);
         kit.drawTracked(g, word, box.x, base, { size: ws, family: fonts.sans, color });
       }
