@@ -2,13 +2,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createCanvas, loadImage } from '@napi-rs/canvas';
 import * as kit from '@loksly/lcd-canvas-kit';
-import { createBaseContext, localize, defaultsOf, validate, DEFAULT_THEME, DEFAULT_WORKDAY } from '@kiosko/sdk';
-import { airquality, aqiCategory, parseAir, pollenLevel } from './airquality.ts';
-import { phrasesFor, pick, poolFor } from './compliments.ts';
+import { createBaseContext, errorMessage, localize, defaultsOf, validate, DEFAULT_THEME, DEFAULT_WORKDAY } from '@kiosko/sdk';
+import { airquality, aqiCategory, inEurope, parseAir, pollenLevel, resolveIndex } from './airquality.ts';
+import { BUILTIN_PHRASES, phrasesFor, pick, poolFor } from './compliments.ts';
 import { countdown, countdownLevel, daysUntil, upcoming } from './countdown.ts';
-import { compass, distanceBearing, earthquakes, parseEmsc } from './earthquakes.ts';
+import { compass, distanceBearing, earthquakes, parseEmsc, placeLanguages } from './earthquakes.ts';
 import { choosePlayer, parsePlayer, positionAt } from './nowplaying.ts';
-import { cleanText, wikiLang, yearsAgo } from './onthisday.ts';
+import { cleanText, wikiLang, wikiVariant, yearsAgo } from './onthisday.ts';
 import { isPng, tilesAround, wetFraction, worldPx } from './rainmap.ts';
 import { ISSUE_QUERIES, issuesByDay, mergeIssues, parseTaskFile, sortTasks, tasks } from './tasks.ts';
 import { trafficmap } from './trafficmap.ts';
@@ -59,10 +59,13 @@ test('compliments: by time of day, stable for changeMs, built-in phrases when no
   assert.equal(pick(p, t, 30 * 60_000), pick(p, t + 60_000, 30 * 60_000), 'does not change on every repaint');
   assert.equal(pick({ ...p, morning: [], anytime: [] }, t, 60_000), null);
   const empty = { morning: [], afternoon: [], evening: [], anytime: [] };
-  assert.ok(phrasesFor(empty, (x) => localize(x, 'es-ES')).morning.includes('Buenos días.'));
-  assert.ok(phrasesFor(empty, (x) => localize(x, 'en-GB')).morning.includes('Good morning.'));
-  assert.ok(phrasesFor(empty, (x) => localize(x, 'de')).morning.includes('Good morning.'), 'any other language: English');
-  assert.equal(phrasesFor(p, es), p);
+  const lang = (locale: string) => createBaseContext({ now: 0, locale }).pickLanguage;
+  assert.ok(phrasesFor(empty, lang('es-ES')).morning.includes('Buenos días.'));
+  assert.ok(phrasesFor(empty, lang('en-GB')).morning.includes('Good morning.'));
+  assert.ok(phrasesFor(empty, lang('de')).morning.includes('Good morning.'), 'any other language: English');
+  assert.equal(phrasesFor(empty, lang('zh-TW')), BUILTIN_PHRASES['zh-Hant']);
+  assert.equal(phrasesFor(empty, lang('zh-CN')), BUILTIN_PHRASES['zh-Hans']);
+  assert.equal(phrasesFor(p, lang('es')), p);
   assert.deepEqual(compliments.options!.props.align.values, ['left', 'center', 'right']);
 });
 
@@ -120,6 +123,18 @@ test('air quality: European index bands and pollen levels', () => {
   assert.equal(d.aqi, 34);
   assert.equal(d.pm10, 0);
   assert.deepEqual(d.pollen, { olive_pollen: 12 });
+  // Outside Europe there is no pollen model: nothing to tell, not "no pollen".
+  assert.deepEqual(parseAir({ us_aqi: 50, olive_pollen: null }, 'us', false), { index: 'us', aqi: 50, pm2_5: 0, pm10: 0, ozone: 0, no2: 0, pollen: {}, pollenHere: false });
+  assert.equal(inEurope(38.35, -0.48), true, 'Alicante');
+  assert.equal(inEurope(25.03, 121.56), false, 'Taipei');
+  assert.equal(inEurope(40.71, -74.0), false, 'New York');
+  // Automatic index: US for Chinese, Japanese and Korean readers, European otherwise.
+  assert.equal(o.index, 'auto');
+  assert.equal(resolveIndex('auto', 'zh-TW'), 'us');
+  assert.equal(resolveIndex('auto', 'zh-CN'), 'us');
+  assert.equal(resolveIndex('auto', 'ja'), 'us');
+  assert.equal(resolveIndex('auto', 'es-ES'), 'european');
+  assert.equal(resolveIndex('european', 'zh-TW'), 'european');
 });
 
 test('on this day: no reference to the front-page photo; language from the option or the locale', () => {
@@ -129,8 +144,18 @@ test('on this day: no reference to the front-page photo; language from the optio
   assert.equal(wikiLang('', 'es-ES'), 'es');
   assert.equal(wikiLang('de', 'es-ES'), 'de');
   assert.equal(wikiLang('', 'x'), 'en');
-  assert.equal(yearsAgo(1, es), 'hace 1 año');
-  assert.equal(yearsAgo(53, en), '53 years ago');
+  const plural = (locale: string) => createBaseContext({ now: 0, locale }).plural;
+  assert.equal(yearsAgo(1, plural('es')), 'hace 1 año');
+  assert.equal(yearsAgo(1, plural('en')), '1 year ago');
+  assert.equal(yearsAgo(53, plural('en')), '53 years ago');
+  assert.equal(yearsAgo(53, plural('zh-TW')), '53 年前');
+  // zh.wikipedia.org converts to the reader's script when asked.
+  assert.equal(wikiVariant(wikiLang('', 'zh-TW'), 'zh-TW'), 'zh-tw');
+  assert.equal(wikiVariant(wikiLang('', 'zh-Hant-HK'), 'zh-Hant-HK'), 'zh-hk');
+  assert.equal(wikiVariant(wikiLang('', 'zh-CN'), 'zh-CN'), 'zh-cn');
+  assert.equal(wikiVariant(wikiLang('', 'zh'), 'zh'), 'zh-cn');
+  assert.equal(wikiVariant('zh', 'en'), undefined);
+  assert.equal(wikiVariant('es', 'zh-TW'), undefined);
 });
 
 test('earthquakes: distance and bearing from home, EMSC newest first, localized words', () => {
@@ -214,7 +239,7 @@ test('traffic map: missing settings, HTTP errors, invalid tiles and attribution 
   const options = { ...defaultsOf(trafficmap.options!), apiKey: 'test-key' };
   const ctx = { ...createBaseContext({ now: 123, location: { latitude: 37.9922, longitude: -1.1307 } }), options, canvas: { createCanvas, loadImage }, signal: new AbortController().signal, timeoutMs: 120_000, sources: {} };
   await assert.rejects(trafficmap.fetch!({ ...ctx, options: { ...options, apiKey: '' } }), /API key/);
-  await assert.rejects(trafficmap.fetch!({ ...ctx, location: undefined }), /no coordinates/);
+  await assert.rejects(trafficmap.fetch!({ ...ctx, location: undefined }), /No coordinates/);
   await assert.rejects(trafficmap.fetch!({ ...ctx, location: { latitude: 91, longitude: 0 } }), /Invalid traffic map coordinates/);
 
   const fetchMock = t.mock.method(globalThis, 'fetch', async () => new Response('', { status: 403 }));
@@ -255,4 +280,15 @@ test('plugin: every widget has an icon, a category, sizes and demo data', () => 
     assert.ok(w.icon && w.category && w.size?.preferred && w.demo, w.id);
     assert.doesNotThrow(() => w.demo!({ options: w.options!.default, now: Date.now(), locale: "en" }), w.id);
   }
+});
+
+test('earthquakes: place names asked in the reader script; cards without a place say so in their language', async () => {
+  assert.equal(placeLanguages('zh-TW'), 'zh-Hant,zh-TW,zh');
+  assert.equal(placeLanguages('zh-Hant'), 'zh-Hant,zh-TW,zh');
+  assert.equal(placeLanguages('zh-CN'), 'zh-Hans,zh-CN,zh');
+  assert.equal(placeLanguages('es-ES'), 'es');
+  const { noPlace } = await import('./util.ts');
+  assert.match(errorMessage(noPlace(), 'zh-TW'), /^沒有座標/);
+  assert.match(errorMessage(noPlace(), 'zh-CN'), /^没有坐标/);
+  assert.match(errorMessage(noPlace(), 'en'), /^No coordinates/);
 });

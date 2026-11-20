@@ -3,7 +3,7 @@
  * with MagicMirror²: lists for the morning, the afternoon, the evening and
  * any time, and the phrase changes every `changeMs`.
  */
-import { defineWidget, t, type Localized } from '@kiosko/sdk';
+import { defineWidget, t, type BaseContext, type Localized } from '@kiosko/sdk';
 import { clamp } from './util.ts';
 
 export interface Phrases {
@@ -42,9 +42,9 @@ export const BUILTIN_PHRASES: Record<'en' | 'es' | 'zh-Hant' | 'zh-Hans', Phrase
 };
 
 /** The user's lists, or the built-in ones in their language (English for any other) when they wrote none. */
-export function phrasesFor(p: Phrases, tr: (text: Localized) => string): Phrases {
+export function phrasesFor(p: Phrases, pickLanguage: BaseContext['pickLanguage']): Phrases {
   const own = p.morning.length + p.afternoon.length + p.evening.length + p.anytime.length > 0;
-  return own ? p : BUILTIN_PHRASES[tr({ en: 'en', es: 'es', 'zh-Hant': 'zh-Hant', 'zh-Hans': 'zh-Hans' }) as keyof typeof BUILTIN_PHRASES] ?? BUILTIN_PHRASES.en;
+  return own ? p : BUILTIN_PHRASES[pickLanguage(Object.keys(BUILTIN_PHRASES)) as keyof typeof BUILTIN_PHRASES] ?? BUILTIN_PHRASES.en;
 }
 
 /** The phrases for this hour: morning from 3 to 12, afternoon from 12 to 17, evening the rest. */
@@ -60,8 +60,8 @@ export function pick(p: Phrases, now: number, changeMs: number): string | null {
   return pool[Math.floor(now / Math.max(60_000, changeMs)) % pool.length]!;
 }
 
-const listField = (en: string, es: string) =>
-  t.list(t.string({ placeholder: '…' }), { label: { en, es }, help: { en: 'Leave every list empty to use the built-in phrases, in your language.', es: 'Con todas las listas vacías salen las frases de serie, en tu idioma.', 'zh-Hant': '所有清單都留空，就會使用內建的語句（以你的語言顯示）。', 'zh-Hans': '所有列表都留空，就会使用内置的语句（以你的语言显示）。' } });
+const listField = (label: Localized) =>
+  t.list(t.string({ placeholder: '…' }), { label, help: { en: 'Leave every list empty to use the built-in phrases, in your language.', es: 'Con todas las listas vacías salen las frases de serie, en tu idioma.', 'zh-Hant': '所有清單都留空，就會使用內建的語句（以你的語言顯示）。', 'zh-Hans': '所有列表都留空，就会使用内置的语句（以你的语言显示）。' } });
 
 export const compliments = defineWidget({
   id: 'compliments',
@@ -72,17 +72,17 @@ export const compliments = defineWidget({
   tags: ['magicmirror', 'motivation'],
   size: { min: { w: 200, h: 80 }, preferred: { w: 600, h: 220 } },
   options: t.object({
-    morning: listField('Morning (3–12 h)', 'Mañana (3–12 h)'),
-    afternoon: listField('Afternoon (12–17 h)', 'Tarde (12–17 h)'),
-    evening: listField('Evening and night', 'Noche'),
-    anytime: listField('Any time', 'A cualquier hora'),
+    morning: listField({ en: 'Morning (3–12 h)', es: 'Mañana (3–12 h)', 'zh-Hant': '早上（3–12 時）', 'zh-Hans': '早上（3–12 时）' }),
+    afternoon: listField({ en: 'Afternoon (12–17 h)', es: 'Tarde (12–17 h)', 'zh-Hant': '下午（12–17 時）', 'zh-Hans': '下午（12–17 时）' }),
+    evening: listField({ en: 'Evening and night', es: 'Noche', 'zh-Hant': '傍晚與夜間', 'zh-Hans': '傍晚和夜间' }),
+    anytime: listField({ en: 'Any time', es: 'A cualquier hora', 'zh-Hant': '任何時段', 'zh-Hans': '任何时段' }),
     changeMs: t.duration({ default: 30 * 60_000, min: 60_000, label: { en: 'Change every', es: 'Cambia cada', 'zh-Hant': '更換間隔', 'zh-Hans': '切换间隔' } }),
     maxSize: t.integer({ default: 56, min: 16, max: 200, unit: 'px', slider: true, label: { en: 'Largest letter size', es: 'Tamaño máximo de letra', 'zh-Hant': '最大字級', 'zh-Hans': '最大字号' } }),
     align: t.enum(['left', 'center', 'right'] as const, { label: { en: 'Alignment', es: 'Alineación', 'zh-Hant': '對齊', 'zh-Hans': '对齐' }, labels: { left: { en: 'Left', es: 'Izquierda', 'zh-Hant': '靠左', 'zh-Hans': '左对齐' }, center: { en: 'Centre', es: 'Centro', 'zh-Hant': '置中', 'zh-Hans': '居中' }, right: { en: 'Right', es: 'Derecha', 'zh-Hant': '靠右', 'zh-Hans': '右对齐' } } }),
   }),
   redraw: 'minute',
-  render(g, { box, options, now, theme, kit, t: tr }) {
-    const text = pick(phrasesFor(options, tr), now, options.changeMs);
+  render(g, { box, options, now, theme, kit, pickLanguage }) {
+    const text = pick(phrasesFor(options, pickLanguage), now, options.changeMs);
     if (!text) return;
     const family = theme.fonts.sans;
     // The largest size at which it fits in up to four lines without an ellipsis.

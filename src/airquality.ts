@@ -5,8 +5,8 @@
  * Pollen comes from the Copernicus models, in Europe and in season only; its
  * levels (low, moderate, high) are a rough guide.
  */
-import { defineWidget, placeOf, t, type Localized } from '@kiosko/sdk';
-import { clamp, fmt, NO_PLACE, placeOptions, within } from './util.ts';
+import { defineWidget, hanScript, placeOf, t, type Localized } from '@kiosko/sdk';
+import { clamp, fmt, noPlace, placeOptions, within } from './util.ts';
 
 export const POLLEN = {
   grass_pollen: { en: 'Grass', es: 'Gramíneas', 'zh-Hant': '禾草', 'zh-Hans': '禾草' },
@@ -20,6 +20,24 @@ export type PollenKey = keyof typeof POLLEN;
 
 export type AqiIndex = 'european' | 'us';
 
+/**
+ * The index to show for `auto`: the European one, but the US scale for
+ * readers of Chinese, Japanese and Korean (the 0–500 scale their own
+ * agencies use too; the European one means nothing there).
+ */
+export function resolveIndex(option: AqiIndex | 'auto', locale: string): AqiIndex {
+  return option === 'auto' ? (hanScript(locale) ? 'us' : 'european') : option;
+}
+
+/**
+ * Whether a place is under the Copernicus European model, the only one
+ * with pollen (30–72° N, 25° W–45° E). Elsewhere Open-Meteo gives nulls or
+ * zeros, so its European trees and grasses are not even asked for.
+ */
+export function inEurope(latitude: number, longitude: number): boolean {
+  return latitude >= 30 && latitude <= 72 && longitude >= -25 && longitude <= 45;
+}
+
 export interface AirData {
   /** The index asked for (`index`); absent in old readings means European. */
   index?: AqiIndex;
@@ -29,6 +47,8 @@ export interface AirData {
   ozone: number;
   no2: number;
   pollen: Partial<Record<PollenKey, number>>;
+  /** False outside Europe, where there is no pollen model (nothing to say, not "no pollen"). */
+  pollenHere?: boolean;
 }
 
 /** The bands of the European index; Spanish names as the MITECO uses them. */
@@ -78,11 +98,11 @@ const LEVEL_COLOR: Record<AqiIndex, string[]> = {
 };
 
 /** Open-Meteo's `current` block → our data. */
-export function parseAir(current: Record<string, number | null | undefined>, index: AqiIndex = 'european'): AirData {
+export function parseAir(current: Record<string, number | null | undefined>, index: AqiIndex = 'european', withPollen = true): AirData {
   const pollen: AirData['pollen'] = {};
-  for (const k of Object.keys(POLLEN) as PollenKey[]) if ((current[k] ?? 0) > 0) pollen[k] = current[k]!;
+  if (withPollen) for (const k of Object.keys(POLLEN) as PollenKey[]) if ((current[k] ?? 0) > 0) pollen[k] = current[k]!;
   const aqi = index === 'us' ? current.us_aqi : current.european_aqi;
-  return { index, aqi: Math.round(aqi ?? 0), pm2_5: current.pm2_5 ?? 0, pm10: current.pm10 ?? 0, ozone: current.ozone ?? 0, no2: current.nitrogen_dioxide ?? 0, pollen };
+  return { index, aqi: Math.round(aqi ?? 0), pm2_5: current.pm2_5 ?? 0, pm10: current.pm10 ?? 0, ozone: current.ozone ?? 0, no2: current.nitrogen_dioxide ?? 0, pollen, ...(withPollen ? {} : { pollenHere: false }) };
 }
 
 const DEMO: AirData = { index: 'european', aqi: 34, pm2_5: 8.2, pm10: 17.4, ozone: 61, no2: 12.6, pollen: { olive_pollen: 22, grass_pollen: 6.5 } };
@@ -96,9 +116,10 @@ export const airquality = defineWidget({
   tags: ['magicmirror', 'weather', 'pollen'],
   size: { min: { w: 240, h: 130 }, preferred: { w: 400, h: 300 } },
   options: t.object({
-    index: t.enum(['european', 'us'] as const, {
+    index: t.enum(['auto', 'european', 'us'] as const, {
       label: { en: 'Index', es: 'Índice', 'zh-Hant': '指標', 'zh-Hans': '指数' },
-      labels: { european: { en: 'European (EAQI, 0–100+)', es: 'Europeo (EAQI, 0–100+)', 'zh-Hant': '歐洲（EAQI，0–100+）', 'zh-Hans': '欧洲（EAQI，0–100+）' }, us: { en: 'US (AQI, 0–500)', es: 'EE. UU. (AQI, 0–500)', 'zh-Hant': '美國（AQI，0–500）', 'zh-Hans': '美国（AQI，0–500）' } },
+      help: { en: 'Automatic: the US one for Chinese, Japanese and Korean, the European one otherwise.', es: 'Automático: el de EE. UU. en chino, japonés y coreano; el europeo en los demás idiomas.', 'zh-Hant': '自動：中文、日文與韓文使用美國指標，其他語言使用歐洲指標。', 'zh-Hans': '自动：中文、日文和韩文使用美国指数，其他语言使用欧洲指数。' },
+      labels: { auto: { en: 'Automatic', es: 'Automático', 'zh-Hant': '自動', 'zh-Hans': '自动' }, european: { en: 'European (EAQI, 0–100+)', es: 'Europeo (EAQI, 0–100+)', 'zh-Hant': '歐洲（EAQI，0–100+）', 'zh-Hans': '欧洲（EAQI，0–100+）' }, us: { en: 'US (AQI, 0–500)', es: 'EE. UU. (AQI, 0–500)', 'zh-Hant': '美國（AQI，0–500）', 'zh-Hans': '美国（AQI，0–500）' } },
     }),
     onlyAbove: t.integer({
       default: 0,
@@ -116,13 +137,15 @@ export const airquality = defineWidget({
     ...placeOptions(),
   }),
   intervalMs: 30 * 60_000,
-  async fetch({ options, location, signal }): Promise<AirData> {
+  async fetch({ options, location, locale, signal }): Promise<AirData> {
     const at = placeOf(options, location);
-    if (!at) throw new Error(NO_PLACE);
-    const vars = [options.index === 'us' ? 'us_aqi' : 'european_aqi', 'pm10', 'pm2_5', 'ozone', 'nitrogen_dioxide', ...Object.keys(POLLEN)].join(',');
+    if (!at) throw noPlace();
+    const index = resolveIndex(options.index, locale);
+    const europe = inEurope(at.latitude, at.longitude);
+    const vars = [index === 'us' ? 'us_aqi' : 'european_aqi', 'pm10', 'pm2_5', 'ozone', 'nitrogen_dioxide', ...(europe ? Object.keys(POLLEN) : [])].join(',');
     const res = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${at.latitude}&longitude=${at.longitude}&current=${vars}&timezone=auto`, { signal: within(signal, 10_000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return parseAir(((await res.json()) as { current?: Record<string, number | null> }).current ?? {}, options.index);
+    return parseAir(((await res.json()) as { current?: Record<string, number | null> }).current ?? {}, index, europe);
   },
   visible: ({ data, options }) => Boolean(data) && (options.onlyAbove <= 0 || data!.aqi >= options.onlyAbove),
   render(g, { data, box, theme, kit, t: tr, locale, options }) {
@@ -135,6 +158,8 @@ export const airquality = defineWidget({
     const indexName = INDEX_NAME[index];
     const gases: [string, number][] = [[tr({ en: 'PM2.5', es: 'PM2,5', 'zh-Hant': 'PM2.5', 'zh-Hans': 'PM2.5' }), data.pm2_5], ['PM10', data.pm10], ['O₃', data.ozone], ['NO₂', data.no2]];
     const pollen = (Object.entries(data.pollen) as [PollenKey, number][]).sort((a, b) => b[1] - a[1]);
+    // Outside Europe there is no pollen to tell: no column for it.
+    const showPollen = options.showPollen && data.pollenHere !== false;
 
     /** Pollen as name over level, left to right, as many as fit in `w`. */
     const drawPollen = (x0: number, y: number, w: number, ps: number, vertical: boolean) => {
@@ -167,7 +192,7 @@ export const airquality = defineWidget({
     if (box.w >= 440 && box.w >= box.h * 2.2) {
       // Wide and short: index | gases (2 × 2) | pollen, side by side.
       const k = clamp(box.h / 150, 0.5, 1.6);
-      const colW = box.w / (options.showPollen ? 3.1 : 2.2);
+      const colW = box.w / (showPollen ? 3.1 : 2.2);
       const big = Math.round(Math.min(box.h * 0.62, colW * 0.5));
       const w = kit.drawTracked(g, String(data.aqi), box.x, box.y + big * 0.86, { size: big, family: fonts.sansBold, color: col });
       kit.drawTracked(g, indexName, box.x + w + 10 * k, box.y + big * 0.4, { size: Math.round(20 * k), family: fonts.sans, color: colors.inkDim });
@@ -180,7 +205,7 @@ export const airquality = defineWidget({
         kit.drawTracked(g, fmt(Math.round(v), locale), gx, gy, { size: vs, family: fonts.sans, color: colors.ink });
         kit.drawTracked(g, `${name} µg/m³`, gx, gy + us * 1.3, { size: us, family: fonts.sans, color: colors.inkDim });
       });
-      if (options.showPollen) drawPollen(gx0 + 2 * gw + 8 * k, box.y + vs * 0.7, box.x + box.w - (gx0 + 2 * gw + 8 * k), Math.round(clamp(box.h * 0.17, 12, 30)), true);
+      if (showPollen) drawPollen(gx0 + 2 * gw + 8 * k, box.y + vs * 0.7, box.x + box.w - (gx0 + 2 * gw + 8 * k), Math.round(clamp(box.h * 0.17, 12, 30)), true);
       return;
     }
 
@@ -188,7 +213,7 @@ export const airquality = defineWidget({
     // In units of k the content is ~305 tall with the pollen row and ~210 without
     // (index, gases, their names and µg/m³ under them): scale to that, or it hangs out of the box.
     const k1 = Math.min(box.w / 368, box.h / 305);
-    const withPollen = options.showPollen && k1 >= 0.6;
+    const withPollen = showPollen && k1 >= 0.6;
     const k = clamp(withPollen ? k1 : Math.min(box.w / 368, box.h / 210), 0.35, 1.6);
     const big = Math.round(100 * k);
     const top = box.y + big * 0.86;

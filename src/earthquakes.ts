@@ -8,8 +8,8 @@
  * the right, the latest ones with magnitude, where (the nearest town, from
  * OpenStreetMap) and when.
  */
-import { defineWidget, drawEmpty, listLayout, listOptions, moreLabel, placeOf, t, type Localized } from '@kiosko/sdk';
-import { clamp, fmt, NO_PLACE, placeOptions, USER_AGENT, within } from './util.ts';
+import { defineWidget, drawEmpty, hanScript, listLayout, listOptions, moreLabel, placeOf, t, type Localized } from '@kiosko/sdk';
+import { clamp, fmt, noPlace, placeOptions, USER_AGENT, within } from './util.ts';
 
 export interface Quake {
   id: string;
@@ -77,13 +77,31 @@ export function parseEmsc(json: { features?: EmscFeature[] }, home: { lat: numbe
 /** Names already looked up, by rounded coordinates (Nominatim asks for at most one query per second). */
 const names = new Map<string, string | null>();
 
+/**
+ * Nominatim's `accept-language` for the user: the bare language, but
+ * Chinese with its script and region first, or a Taiwan reader gets
+ * mainland names (and the other way round).
+ */
+export function placeLanguages(locale: string): string {
+  switch (hanScript(locale)) {
+    case 'Hant':
+      return 'zh-Hant,zh-TW,zh';
+    case 'Hant-HK':
+      return 'zh-Hant,zh-HK,zh';
+    case 'Hans':
+      return 'zh-Hans,zh-CN,zh';
+    default:
+      return locale.split(/[-_]/)[0] || 'en';
+  }
+}
+
 async function placeName(lat: number, lon: number, locale: string, tr: (text: Localized) => string, signal: AbortSignal): Promise<string | null> {
-  const lang = locale.split(/[-_]/)[0] || 'en';
+  const lang = placeLanguages(locale);
   const key = `${lang}:${lat.toFixed(2)},${lon.toFixed(2)}`;
   if (names.has(key)) return names.get(key)!;
   await new Promise((r) => setTimeout(r, 1100));
   try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=10&accept-language=${lang}`, {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=10&accept-language=${encodeURIComponent(lang)}`, {
       headers: { 'User-Agent': USER_AGENT },
       signal: within(signal, 10_000),
     });
@@ -128,7 +146,7 @@ export const earthquakes = defineWidget({
   redraw: 'minute',
   async fetch({ options, now, location, locale, signal, t: tr }): Promise<QuakesData> {
     const at = placeOf(options, location);
-    if (!at) throw new Error(NO_PLACE);
+    if (!at) throw noPlace();
     const home = { lat: at.latitude, lon: at.longitude };
     const start = new Date(now - options.days * 86_400_000).toISOString().slice(0, 19);
     const url = `https://www.seismicportal.eu/fdsnws/event/1/query?format=json&lat=${home.lat}&lon=${home.lon}&maxradius=${(options.radiusKm / 111.2).toFixed(3)}&minmag=${options.minMagnitude}&start=${start}&limit=200`;

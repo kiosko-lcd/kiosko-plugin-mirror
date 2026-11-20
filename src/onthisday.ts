@@ -3,7 +3,7 @@
  * anniversaries" (its REST API, no key), in the user's language. One at a
  * time, changing every `changeMs`.
  */
-import { defineWidget, t, type Localized } from '@kiosko/sdk';
+import { defineWidget, hanScript, t, type BaseContext } from '@kiosko/sdk';
 import { clamp, USER_AGENT, within } from './util.ts';
 
 export interface Ephemeris {
@@ -33,9 +33,29 @@ export function wikiLang(option: string, locale: string): string {
   return /^[a-z]{2,3}$/.test(l) ? l : 'en';
 }
 
+/**
+ * The script to ask zh.wikipedia.org for (`Accept-Language`), which writes
+ * every article in both and converts on the way out: Traditional as in
+ * Taiwan or Hong Kong, or Simplified, by the user's locale. Undefined for
+ * other editions, or a Chinese edition asked for by a reader of neither.
+ */
+export function wikiVariant(lang: string, locale: string): string | undefined {
+  if (lang !== 'zh') return undefined;
+  switch (hanScript(locale)) {
+    case 'Hant':
+      return 'zh-tw';
+    case 'Hant-HK':
+      return 'zh-hk';
+    case 'Hans':
+      return 'zh-cn';
+    default:
+      return undefined;
+  }
+}
+
 /** "53 years ago" / "hace 53 años". */
-export function yearsAgo(n: number, tr: (text: Localized) => string): string {
-  return n === 1 ? tr({ en: '1 year ago', es: 'hace 1 año', 'zh-Hant': '1 年前', 'zh-Hans': '1 年前' }) : tr({ en: `${n} years ago`, es: `hace ${n} años`, 'zh-Hant': `${n} 年前`, 'zh-Hans': `${n} 年前` });
+export function yearsAgo(n: number, plural: BaseContext['plural']): string {
+  return plural(n, { en: { one: '{n} year ago', other: '{n} years ago' }, es: { one: 'hace {n} año', other: 'hace {n} años' }, 'zh-Hant': { other: '{n} 年前' }, 'zh-Hans': { other: '{n} 年前' } });
 }
 
 const DEMO: Ephemeris[] = [
@@ -94,8 +114,10 @@ export const onthisday = defineWidget({
   async fetch({ options, now, locale, signal }): Promise<OnThisDayData> {
     const d = new Date(now);
     const mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
-    const res = await fetch(`https://${wikiLang(options.lang, locale)}.wikipedia.org/api/rest_v1/feed/onthisday/selected/${mm}/${dd}`, {
-      headers: { 'User-Agent': USER_AGENT },
+    const lang = wikiLang(options.lang, locale);
+    const variant = wikiVariant(lang, locale);
+    const res = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/feed/onthisday/selected/${mm}/${dd}`, {
+      headers: { 'User-Agent': USER_AGENT, ...(variant ? { 'Accept-Language': variant } : {}) },
       signal: within(signal, 10_000),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -104,7 +126,7 @@ export const onthisday = defineWidget({
     return { day: `${mm}-${dd}`, items };
   },
   visible: ({ data }) => Boolean(data?.items.length),
-  render(g, { options, data, now, box, theme, kit, t: tr }) {
+  render(g, { options, data, now, box, theme, kit, plural }) {
     if (!data?.items.length) return;
     const { colors, fonts } = theme;
     const e = data.items[Math.floor(now / Math.max(60_000, options.changeMs)) % data.items.length]!;
@@ -113,7 +135,7 @@ export const onthisday = defineWidget({
     const ago = new Date(now).getFullYear() - e.year;
     if (ago > 0) {
       const s = Math.round(yearSize * 0.42);
-      kit.drawTracked(g, kit.truncate(g, yearsAgo(ago, tr), box.w - yw - s, { size: s, family: fonts.sans }), box.x + yw + s * 0.6, box.y + yearSize * 0.82, { size: s, family: fonts.sans, color: colors.inkDim });
+      kit.drawTracked(g, kit.truncate(g, yearsAgo(ago, plural), box.w - yw - s, { size: s, family: fonts.sans }), box.x + yw + s * 0.6, box.y + yearSize * 0.82, { size: s, family: fonts.sans, color: colors.inkDim });
     }
     const top = box.y + yearSize * 1.25;
     const room = box.y + box.h - top;

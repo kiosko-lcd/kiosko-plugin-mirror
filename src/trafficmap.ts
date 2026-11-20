@@ -2,9 +2,9 @@
  * Live traffic flow around the configured place, using TomTom's raster
  * basemap and traffic tiles. The free tier requires an API key.
  */
-import { defineWidget, placeOf, t, type Box, type Canvas, type Graphics, type RenderContext } from '@kiosko/sdk';
+import { defineWidget, placeOf, PluginError, t, type Box, type Canvas, type Graphics, type RenderContext } from '@kiosko/sdk';
 import { tilesAround, worldPx } from './rainmap.ts';
-import { clamp, NO_PLACE, placeOptions, USER_AGENT, within } from './util.ts';
+import { clamp, noPlace, placeOptions, USER_AGENT, within } from './util.ts';
 
 const OUT_W = 660, OUT_H = 400, SCALE = 1.5;
 const MAX_LAT = 85.05112878;
@@ -83,11 +83,23 @@ export const trafficmap = defineWidget({
   intervalMs: 10 * 60_000,
   async fetch({ options, location, canvas, signal, now }): Promise<TrafficData> {
     const at = placeOf(options, location);
-    if (!at) throw new Error(NO_PLACE);
+    if (!at) throw noPlace();
     const key = options.apiKey.trim();
-    if (!key) throw new Error('Set a TomTom API key in the traffic map options');
+    if (!key) {
+      throw new PluginError({
+        en: 'Set a TomTom API key in the traffic map options',
+        es: 'Pon una clave de API de TomTom en las opciones del mapa de tráfico',
+        'zh-Hant': '請在交通地圖的選項中設定 TomTom API 金鑰',
+        'zh-Hans': '请在路况地图的选项中设置 TomTom API 密钥',
+      });
+    }
     if (!Number.isFinite(at.latitude) || !Number.isFinite(at.longitude) || Math.abs(at.latitude) > 90 || Math.abs(at.longitude) > 180) {
-      throw new Error('Invalid traffic map coordinates');
+      throw new PluginError({
+        en: 'Invalid traffic map coordinates',
+        es: 'Coordenadas del mapa de tráfico no válidas',
+        'zh-Hant': '交通地圖的座標無效',
+        'zh-Hans': '路况地图的坐标无效',
+      });
     }
 
     const zoom = options.zoom;

@@ -340,7 +340,9 @@
             "x-ui": {
               "label": {
                 "en": "Morning (3–12 h)",
-                "es": "Mañana (3–12 h)"
+                "es": "Mañana (3–12 h)",
+                "zh-Hant": "早上（3–12 時）",
+                "zh-Hans": "早上（3–12 时）"
               },
               "help": {
                 "en": "Leave every list empty to use the built-in phrases, in your language.",
@@ -365,7 +367,9 @@
             "x-ui": {
               "label": {
                 "en": "Afternoon (12–17 h)",
-                "es": "Tarde (12–17 h)"
+                "es": "Tarde (12–17 h)",
+                "zh-Hant": "下午（12–17 時）",
+                "zh-Hans": "下午（12–17 时）"
               },
               "help": {
                 "en": "Leave every list empty to use the built-in phrases, in your language.",
@@ -390,7 +394,9 @@
             "x-ui": {
               "label": {
                 "en": "Evening and night",
-                "es": "Noche"
+                "es": "Noche",
+                "zh-Hant": "傍晚與夜間",
+                "zh-Hans": "傍晚和夜间"
               },
               "help": {
                 "en": "Leave every list empty to use the built-in phrases, in your language.",
@@ -415,7 +421,9 @@
             "x-ui": {
               "label": {
                 "en": "Any time",
-                "es": "A cualquier hora"
+                "es": "A cualquier hora",
+                "zh-Hant": "任何時段",
+                "zh-Hans": "任何时段"
               },
               "help": {
                 "en": "Leave every list empty to use the built-in phrases, in your language.",
@@ -879,7 +887,7 @@
       "sources": [],
       "options": {
         "default": {
-          "index": "european",
+          "index": "auto",
           "onlyAbove": 0,
           "showPollen": true,
           "latitude": 0,
@@ -890,7 +898,8 @@
         "properties": {
           "index": {
             "title": "Index",
-            "default": "european",
+            "description": "Automatic: the US one for Chinese, Japanese and Korean, the European one otherwise.",
+            "default": "auto",
             "x-ui": {
               "label": {
                 "en": "Index",
@@ -898,7 +907,19 @@
                 "zh-Hant": "指標",
                 "zh-Hans": "指数"
               },
+              "help": {
+                "en": "Automatic: the US one for Chinese, Japanese and Korean, the European one otherwise.",
+                "es": "Automático: el de EE. UU. en chino, japonés y coreano; el europeo en los demás idiomas.",
+                "zh-Hant": "自動：中文、日文與韓文使用美國指標，其他語言使用歐洲指標。",
+                "zh-Hans": "自动：中文、日文和韩文使用美国指数，其他语言使用欧洲指数。"
+              },
               "labels": {
+                "auto": {
+                  "en": "Automatic",
+                  "es": "Automático",
+                  "zh-Hant": "自動",
+                  "zh-Hans": "自动"
+                },
                 "european": {
                   "en": "European (EAQI, 0–100+)",
                   "es": "Europeo (EAQI, 0–100+)",
@@ -915,6 +936,7 @@
             },
             "type": "string",
             "enum": [
+              "auto",
               "european",
               "us"
             ]
