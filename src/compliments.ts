@@ -14,7 +14,7 @@ export interface Phrases {
 }
 
 /** Used while the user hasn't written any list of their own. */
-export const BUILTIN_PHRASES: Record<'en' | 'es' | 'zh-Hant' | 'zh-Hans', Phrases> = {
+export const BUILTIN_PHRASES: Record<'en' | 'es' | 'zh-Hant' | 'zh-Hans' | 'de', Phrases> = {
   en: {
     morning: ['Good morning.', 'Coffee first, commits later.', 'Today the tests pass on the first try.'],
     afternoon: ['A good afternoon to close a few issues.', 'Take a break, then carry on.'],
@@ -39,6 +39,12 @@ export const BUILTIN_PHRASES: Record<'en' | 'es' | 'zh-Hant' | 'zh-Hans', Phrase
     evening: ['该提交、该下班了。', '没做完的，明天再说。'],
     anytime: ['深呼吸。', '喝点水。', '一次做一件事。'],
   },
+  de: {
+    morning: ['Guten Morgen.', 'Erst Kaffee, dann Commits.', 'Heute laufen die Tests beim ersten Mal durch.'],
+    afternoon: ['Ein guter Nachmittag, um ein paar Issues zu schließen.', 'Kurz Pause, dann weiter.'],
+    evening: ['Zeit zum Committen und Abschalten.', 'Was nicht fertig ist, kann bis morgen warten.'],
+    anytime: ['Durchatmen.', 'Trink etwas Wasser.', 'Eins nach dem anderen.'],
+  },
 };
 
 /** The user's lists, or the built-in ones in their language (English for any other) when they wrote none. */
@@ -61,24 +67,24 @@ export function pick(p: Phrases, now: number, changeMs: number): string | null {
 }
 
 const listField = (label: Localized) =>
-  t.list(t.string({ placeholder: '…' }), { label, help: { en: 'Leave every list empty to use the built-in phrases, in your language.', es: 'Con todas las listas vacías salen las frases de serie, en tu idioma.', 'zh-Hant': '所有清單都留空，就會使用內建的語句（以你的語言顯示）。', 'zh-Hans': '所有列表都留空，就会使用内置的语句（以你的语言显示）。' } });
+  t.list(t.string({ placeholder: '…' }), { label, help: { en: 'Leave every list empty to use the built-in phrases, in your language.', es: 'Con todas las listas vacías salen las frases de serie, en tu idioma.', 'zh-Hant': '所有清單都留空，就會使用內建的語句（以你的語言顯示）。', 'zh-Hans': '所有列表都留空，就会使用内置的语句（以你的语言显示）。', de: 'Lass alle Listen leer, um die eingebauten Sprüche in deiner Sprache zu nutzen.' } });
 
 export const compliments = defineWidget({
   id: 'compliments',
-  name: { en: 'Compliments', es: 'Frases', 'zh-Hant': '讚美', 'zh-Hans': '夸夸' },
-  description: { en: 'A phrase that suits the time of day, like the MagicMirror² classic.', es: 'Una frase según la hora del día, como el clásico de MagicMirror².', 'zh-Hant': '依一天中的時段顯示一句話，就像 MagicMirror² 的經典模組。', 'zh-Hans': '按一天中的时段显示一句话，就像 MagicMirror² 的经典模块。' },
+  name: { en: 'Compliments', es: 'Frases', 'zh-Hant': '讚美', 'zh-Hans': '夸夸', de: 'Sprüche' },
+  description: { en: 'A phrase that suits the time of day, like the MagicMirror² classic.', es: 'Una frase según la hora del día, como el clásico de MagicMirror².', 'zh-Hant': '依一天中的時段顯示一句話，就像 MagicMirror² 的經典模組。', 'zh-Hans': '按一天中的时段显示一句话，就像 MagicMirror² 的经典模块。', de: 'Ein Spruch passend zur Tageszeit, wie der Klassiker von MagicMirror².' },
   icon: 'quote',
   category: 'fun',
   tags: ['magicmirror', 'motivation'],
   size: { min: { w: 200, h: 80 }, preferred: { w: 600, h: 220 } },
   options: t.object({
-    morning: listField({ en: 'Morning (3–12 h)', es: 'Mañana (3–12 h)', 'zh-Hant': '早上（3–12 時）', 'zh-Hans': '早上（3–12 时）' }),
-    afternoon: listField({ en: 'Afternoon (12–17 h)', es: 'Tarde (12–17 h)', 'zh-Hant': '下午（12–17 時）', 'zh-Hans': '下午（12–17 时）' }),
-    evening: listField({ en: 'Evening and night', es: 'Noche', 'zh-Hant': '傍晚與夜間', 'zh-Hans': '傍晚和夜间' }),
-    anytime: listField({ en: 'Any time', es: 'A cualquier hora', 'zh-Hant': '任何時段', 'zh-Hans': '任何时段' }),
-    changeMs: t.duration({ default: 30 * 60_000, min: 60_000, label: { en: 'Change every', es: 'Cambia cada', 'zh-Hant': '更換間隔', 'zh-Hans': '切换间隔' } }),
-    maxSize: t.integer({ default: 56, min: 16, max: 200, unit: 'px', slider: true, label: { en: 'Largest letter size', es: 'Tamaño máximo de letra', 'zh-Hant': '最大字級', 'zh-Hans': '最大字号' } }),
-    align: t.enum(['left', 'center', 'right'] as const, { label: { en: 'Alignment', es: 'Alineación', 'zh-Hant': '對齊', 'zh-Hans': '对齐' }, labels: { left: { en: 'Left', es: 'Izquierda', 'zh-Hant': '靠左', 'zh-Hans': '左对齐' }, center: { en: 'Centre', es: 'Centro', 'zh-Hant': '置中', 'zh-Hans': '居中' }, right: { en: 'Right', es: 'Derecha', 'zh-Hant': '靠右', 'zh-Hans': '右对齐' } } }),
+    morning: listField({ en: 'Morning (3–12 h)', es: 'Mañana (3–12 h)', 'zh-Hant': '早上（3–12 時）', 'zh-Hans': '早上（3–12 时）', de: 'Morgens (3–12 Uhr)' }),
+    afternoon: listField({ en: 'Afternoon (12–17 h)', es: 'Tarde (12–17 h)', 'zh-Hant': '下午（12–17 時）', 'zh-Hans': '下午（12–17 时）', de: 'Nachmittags (12–17 Uhr)' }),
+    evening: listField({ en: 'Evening and night', es: 'Noche', 'zh-Hant': '傍晚與夜間', 'zh-Hans': '傍晚和夜间', de: 'Abends und nachts' }),
+    anytime: listField({ en: 'Any time', es: 'A cualquier hora', 'zh-Hant': '任何時段', 'zh-Hans': '任何时段', de: 'Jederzeit' }),
+    changeMs: t.duration({ default: 30 * 60_000, min: 60_000, label: { en: 'Change every', es: 'Cambia cada', 'zh-Hant': '更換間隔', 'zh-Hans': '切换间隔', de: 'Wechselt alle' } }),
+    maxSize: t.integer({ default: 56, min: 16, max: 200, unit: 'px', slider: true, label: { en: 'Largest letter size', es: 'Tamaño máximo de letra', 'zh-Hant': '最大字級', 'zh-Hans': '最大字号', de: 'Größte Schriftgröße' } }),
+    align: t.enum(['left', 'center', 'right'] as const, { label: { en: 'Alignment', es: 'Alineación', 'zh-Hant': '對齊', 'zh-Hans': '对齐', de: 'Ausrichtung' }, labels: { left: { en: 'Left', es: 'Izquierda', 'zh-Hant': '靠左', 'zh-Hans': '左对齐', de: 'Links' }, center: { en: 'Centre', es: 'Centro', 'zh-Hant': '置中', 'zh-Hans': '居中', de: 'Mitte' }, right: { en: 'Right', es: 'Derecha', 'zh-Hant': '靠右', 'zh-Hans': '右对齐', de: 'Rechts' } } }),
   }),
   redraw: 'minute',
   render(g, { box, options, now, theme, kit, pickLanguage }) {

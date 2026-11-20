@@ -6,14 +6,16 @@
     "en": "Mirror cards",
     "es": "Tarjetas Mirror",
     "zh-Hant": "Mirror 卡片",
-    "zh-Hans": "Mirror 卡片"
+    "zh-Hans": "Mirror 卡片",
+    "de": "Mirror-Karten"
   },
   "version": "0.2.1",
   "description": {
     "en": "MagicMirror²-style cards: countdown, compliments, today and tomorrow, now playing, on this day, air quality, earthquakes, rain radar and traffic.",
     "es": "Tarjetas al estilo de MagicMirror²: cuenta atrás, frases, hoy y mañana, lo que suena, tal día como hoy, calidad del aire, terremotos, radar de lluvia y tráfico.",
     "zh-Hant": "MagicMirror² 風格的卡片：倒數、讚美、今天與明天、正在播放、歷史上的今天、空氣品質、地震、降雨雷達與交通。",
-    "zh-Hans": "MagicMirror² 风格的卡片：倒计时、夸夸、今天和明天、正在播放、历史上的今天、空气质量、地震、降雨雷达和路况。"
+    "zh-Hans": "MagicMirror² 风格的卡片：倒计时、夸夸、今天和明天、正在播放、历史上的今天、空气质量、地震、降雨雷达和路况。",
+    "de": "Karten im Stil von MagicMirror²: Countdown, Sprüche, heute und morgen, was gerade läuft, heute vor … Jahren, Luftqualität, Erdbeben, Regenradar und Verkehr."
   },
   "author": "Kiosko",
   "license": "MIT",
@@ -30,7 +32,8 @@
     "en",
     "es",
     "zh-Hant",
-    "zh-Hans"
+    "zh-Hans",
+    "de"
   ],
   "categories": [
     "time",
@@ -104,13 +107,15 @@
         "en": "Countdown",
         "es": "Cuenta atrás",
         "zh-Hant": "倒數",
-        "zh-Hans": "倒计时"
+        "zh-Hans": "倒计时",
+        "de": "Countdown"
       },
       "description": {
         "en": "Days left until your important dates, nearest first. Birthdays and anniversaries come back every year.",
         "es": "Los días que faltan para tus fechas importantes, la más cercana primero. Cumpleaños y aniversarios vuelven cada año.",
         "zh-Hant": "距離重要日期還有幾天，最近的排在前面。生日和紀念日每年都會再出現。",
-        "zh-Hans": "距离重要日期还有几天，最近的排在前面。生日和纪念日每年都会再出现。"
+        "zh-Hans": "距离重要日期还有几天，最近的排在前面。生日和纪念日每年都会再出现。",
+        "de": "Die Tage bis zu deinen wichtigen Terminen, der nächste zuerst. Geburtstage und Jahrestage kommen jedes Jahr wieder."
       },
       "icon": "hourglass",
       "category": "time",
@@ -149,13 +154,15 @@
                 "en": "Dates",
                 "es": "Fechas",
                 "zh-Hant": "日期",
-                "zh-Hans": "日期"
+                "zh-Hans": "日期",
+                "de": "Termine"
               },
               "help": {
                 "en": "Past dates hide themselves; yearly ones come back.",
                 "es": "Las fechas pasadas desaparecen solas; las de cada año vuelven.",
                 "zh-Hant": "過去的日期會自動隱藏；每年的日期會再次出現。",
-                "zh-Hans": "过去的日期会自动隐藏；每年的日期会再次出现。"
+                "zh-Hans": "过去的日期会自动隐藏；每年的日期会再次出现。",
+                "de": "Vergangene Termine verschwinden von selbst; jährliche kommen wieder."
               }
             },
             "type": "array",
@@ -176,7 +183,8 @@
                       "en": "What",
                       "es": "Qué",
                       "zh-Hant": "事項",
-                      "zh-Hans": "事项"
+                      "zh-Hans": "事项",
+                      "de": "Was"
                     },
                     "placeholder": "Holidays"
                   },
@@ -190,7 +198,8 @@
                       "en": "Date",
                       "es": "Fecha",
                       "zh-Hant": "日期",
-                      "zh-Hans": "日期"
+                      "zh-Hans": "日期",
+                      "de": "Datum"
                     },
                     "placeholder": "2027-01-25",
                     "format": "date"
@@ -207,13 +216,15 @@
                       "en": "Every year",
                       "es": "Cada año",
                       "zh-Hant": "每年",
-                      "zh-Hans": "每年"
+                      "zh-Hans": "每年",
+                      "de": "Jedes Jahr"
                     },
                     "help": {
                       "en": "Birthdays and anniversaries: the year of the date doesn’t matter.",
                       "es": "Cumpleaños y aniversarios: el año de la fecha da igual.",
                       "zh-Hant": "生日和紀念日：日期的年份不影響。",
-                      "zh-Hans": "生日和纪念日：日期中的年份无所谓。"
+                      "zh-Hans": "生日和纪念日：日期中的年份无所谓。",
+                      "de": "Geburtstage und Jahrestage: Das Jahr des Datums spielt keine Rolle."
                     }
                   },
                   "type": "boolean"
@@ -229,12 +240,14 @@
               "label": {
                 "en": "Rows",
                 "es": "Filas",
+                "de": "Zeilen",
                 "zh-Hant": "列數",
                 "zh-Hans": "行数"
               },
               "help": {
                 "en": "0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in \"+N more\".",
                 "es": "0 = las que quepan. Con un número se ven esas, en filas de un tamaño legible (menos si la tesela no da para ellas); el resto se cuenta en «+N más».",
+                "de": "0 = so viele, wie passen. Eine Zahl zeigt so viele, in Zeilen lesbarer Größe (weniger, wenn die Kachel dafür zu klein ist); der Rest wird als „+N weitere“ gezählt.",
                 "zh-Hant": "0 = 盡量放滿。填數字則顯示該數量，並以易讀的大小排列（方格太小時會減少）；其餘的計入「還有 N 個」。",
                 "zh-Hans": "0 = 尽量放满。填数字则显示该数量，并以易读的大小排列（格子太小时会减少）；其余的计入“还有 N 个”。"
               }
@@ -251,7 +264,8 @@
                 "en": "Amber from (days before)",
                 "es": "Ámbar desde (días antes)",
                 "zh-Hant": "琥珀色起始（提前天數）",
-                "zh-Hans": "琥珀色起始（提前天数）"
+                "zh-Hans": "琥珀色起始（提前天数）",
+                "de": "Gelb ab (Tage vorher)"
               },
               "unit": "d"
             },
@@ -268,13 +282,15 @@
                 "en": "Red from (days before)",
                 "es": "Rojo desde (días antes)",
                 "zh-Hant": "紅色起始（提前天數）",
-                "zh-Hans": "红色起始（提前天数）"
+                "zh-Hans": "红色起始（提前天数）",
+                "de": "Rot ab (Tage vorher)"
               },
               "help": {
                 "en": "0: only on the day.",
                 "es": "0: sólo el mismo día.",
                 "zh-Hant": "0：只在當天。",
-                "zh-Hans": "0：仅当天。"
+                "zh-Hans": "0：仅当天。",
+                "de": "0: nur am Tag selbst."
               },
               "unit": "d"
             },
@@ -294,13 +310,15 @@
         "en": "Compliments",
         "es": "Frases",
         "zh-Hant": "讚美",
-        "zh-Hans": "夸夸"
+        "zh-Hans": "夸夸",
+        "de": "Sprüche"
       },
       "description": {
         "en": "A phrase that suits the time of day, like the MagicMirror² classic.",
         "es": "Una frase según la hora del día, como el clásico de MagicMirror².",
         "zh-Hant": "依一天中的時段顯示一句話，就像 MagicMirror² 的經典模組。",
-        "zh-Hans": "按一天中的时段显示一句话，就像 MagicMirror² 的经典模块。"
+        "zh-Hans": "按一天中的时段显示一句话，就像 MagicMirror² 的经典模块。",
+        "de": "Ein Spruch passend zur Tageszeit, wie der Klassiker von MagicMirror²."
       },
       "icon": "quote",
       "category": "fun",
@@ -342,13 +360,15 @@
                 "en": "Morning (3–12 h)",
                 "es": "Mañana (3–12 h)",
                 "zh-Hant": "早上（3–12 時）",
-                "zh-Hans": "早上（3–12 时）"
+                "zh-Hans": "早上（3–12 时）",
+                "de": "Morgens (3–12 Uhr)"
               },
               "help": {
                 "en": "Leave every list empty to use the built-in phrases, in your language.",
                 "es": "Con todas las listas vacías salen las frases de serie, en tu idioma.",
                 "zh-Hant": "所有清單都留空，就會使用內建的語句（以你的語言顯示）。",
-                "zh-Hans": "所有列表都留空，就会使用内置的语句（以你的语言显示）。"
+                "zh-Hans": "所有列表都留空，就会使用内置的语句（以你的语言显示）。",
+                "de": "Lass alle Listen leer, um die eingebauten Sprüche in deiner Sprache zu nutzen."
               }
             },
             "type": "array",
@@ -369,13 +389,15 @@
                 "en": "Afternoon (12–17 h)",
                 "es": "Tarde (12–17 h)",
                 "zh-Hant": "下午（12–17 時）",
-                "zh-Hans": "下午（12–17 时）"
+                "zh-Hans": "下午（12–17 时）",
+                "de": "Nachmittags (12–17 Uhr)"
               },
               "help": {
                 "en": "Leave every list empty to use the built-in phrases, in your language.",
                 "es": "Con todas las listas vacías salen las frases de serie, en tu idioma.",
                 "zh-Hant": "所有清單都留空，就會使用內建的語句（以你的語言顯示）。",
-                "zh-Hans": "所有列表都留空，就会使用内置的语句（以你的语言显示）。"
+                "zh-Hans": "所有列表都留空，就会使用内置的语句（以你的语言显示）。",
+                "de": "Lass alle Listen leer, um die eingebauten Sprüche in deiner Sprache zu nutzen."
               }
             },
             "type": "array",
@@ -396,13 +418,15 @@
                 "en": "Evening and night",
                 "es": "Noche",
                 "zh-Hant": "傍晚與夜間",
-                "zh-Hans": "傍晚和夜间"
+                "zh-Hans": "傍晚和夜间",
+                "de": "Abends und nachts"
               },
               "help": {
                 "en": "Leave every list empty to use the built-in phrases, in your language.",
                 "es": "Con todas las listas vacías salen las frases de serie, en tu idioma.",
                 "zh-Hant": "所有清單都留空，就會使用內建的語句（以你的語言顯示）。",
-                "zh-Hans": "所有列表都留空，就会使用内置的语句（以你的语言显示）。"
+                "zh-Hans": "所有列表都留空，就会使用内置的语句（以你的语言显示）。",
+                "de": "Lass alle Listen leer, um die eingebauten Sprüche in deiner Sprache zu nutzen."
               }
             },
             "type": "array",
@@ -423,13 +447,15 @@
                 "en": "Any time",
                 "es": "A cualquier hora",
                 "zh-Hant": "任何時段",
-                "zh-Hans": "任何时段"
+                "zh-Hans": "任何时段",
+                "de": "Jederzeit"
               },
               "help": {
                 "en": "Leave every list empty to use the built-in phrases, in your language.",
                 "es": "Con todas las listas vacías salen las frases de serie, en tu idioma.",
                 "zh-Hant": "所有清單都留空，就會使用內建的語句（以你的語言顯示）。",
-                "zh-Hans": "所有列表都留空，就会使用内置的语句（以你的语言显示）。"
+                "zh-Hans": "所有列表都留空，就会使用内置的语句（以你的语言显示）。",
+                "de": "Lass alle Listen leer, um die eingebauten Sprüche in deiner Sprache zu nutzen."
               }
             },
             "type": "array",
@@ -449,7 +475,8 @@
                 "en": "Change every",
                 "es": "Cambia cada",
                 "zh-Hant": "更換間隔",
-                "zh-Hans": "切换间隔"
+                "zh-Hans": "切换间隔",
+                "de": "Wechselt alle"
               },
               "unit": "ms"
             },
@@ -464,7 +491,8 @@
                 "en": "Largest letter size",
                 "es": "Tamaño máximo de letra",
                 "zh-Hant": "最大字級",
-                "zh-Hans": "最大字号"
+                "zh-Hans": "最大字号",
+                "de": "Größte Schriftgröße"
               },
               "unit": "px",
               "slider": true
@@ -481,26 +509,30 @@
                 "en": "Alignment",
                 "es": "Alineación",
                 "zh-Hant": "對齊",
-                "zh-Hans": "对齐"
+                "zh-Hans": "对齐",
+                "de": "Ausrichtung"
               },
               "labels": {
                 "left": {
                   "en": "Left",
                   "es": "Izquierda",
                   "zh-Hant": "靠左",
-                  "zh-Hans": "左对齐"
+                  "zh-Hans": "左对齐",
+                  "de": "Links"
                 },
                 "center": {
                   "en": "Centre",
                   "es": "Centro",
                   "zh-Hant": "置中",
-                  "zh-Hans": "居中"
+                  "zh-Hans": "居中",
+                  "de": "Mitte"
                 },
                 "right": {
                   "en": "Right",
                   "es": "Derecha",
                   "zh-Hant": "靠右",
-                  "zh-Hans": "右对齐"
+                  "zh-Hans": "右对齐",
+                  "de": "Rechts"
                 }
               }
             },
@@ -523,13 +555,15 @@
         "en": "Today and tomorrow",
         "es": "Hoy y mañana",
         "zh-Hant": "今天與明天",
-        "zh-Hans": "今天和明天"
+        "zh-Hans": "今天和明天",
+        "de": "Heute und morgen"
       },
       "description": {
         "en": "Your to-dos for today and tomorrow, from a Markdown checklist and, optionally, your GitLab issues.",
         "es": "Lo que tienes para hoy y mañana, de una lista de casillas en Markdown y, si quieres, de tus issues de GitLab.",
         "zh-Hant": "你今天和明天的待辦事項，來自 Markdown 核取清單，也可加入你的 GitLab 問題。",
-        "zh-Hans": "你今天和明天的待办事项，来自 Markdown 任务清单，也可加入你的 GitLab 议题。"
+        "zh-Hans": "你今天和明天的待办事项，来自 Markdown 任务清单，也可加入你的 GitLab 议题。",
+        "de": "Deine Aufgaben für heute und morgen aus einer Markdown-Checkliste und, wenn du willst, deine GitLab-Issues."
       },
       "icon": "list-checks",
       "category": "productivity",
@@ -569,13 +603,15 @@
                 "en": "Checklist file",
                 "es": "Fichero de tareas",
                 "zh-Hant": "待辦清單檔案",
-                "zh-Hans": "待办清单文件"
+                "zh-Hans": "待办清单文件",
+                "de": "Checklisten-Datei"
               },
               "help": {
                 "en": "Markdown with \"- [ ] …\" boxes under \"## Today\" and \"## Tomorrow\"; \"@2026-10-14\" dates a box.",
                 "es": "Markdown con casillas «- [ ] …» bajo «## Hoy» y «## Mañana»; «@2026-10-14» le pone fecha.",
                 "zh-Hant": "Markdown 檔，在「## Today」和「## Tomorrow」下放「- [ ] …」核取方塊；「@2026-10-14」可為方塊指定日期。",
-                "zh-Hans": "Markdown 文件，在“## Today”和“## Tomorrow”下放“- [ ] …”复选框；“@2026-10-14”可为复选框指定日期。"
+                "zh-Hans": "Markdown 文件，在“## Today”和“## Tomorrow”下放“- [ ] …”复选框；“@2026-10-14”可为复选框指定日期。",
+                "de": "Markdown mit „- [ ] …“-Kästchen unter „## Today“ und „## Tomorrow“; „@2026-10-14“ gibt einem Kästchen ein Datum."
               },
               "format": "path"
             },
@@ -591,13 +627,15 @@
                 "en": "Add my GitLab issues with a due date",
                 "es": "Añadir mis issues de GitLab con fecha",
                 "zh-Hant": "加入我有到期日的 GitLab 問題",
-                "zh-Hans": "添加我有截止日期的 GitLab 议题"
+                "zh-Hans": "添加我有截止日期的 GitLab 议题",
+                "de": "Meine GitLab-Issues mit Fälligkeitsdatum hinzufügen"
               },
               "help": {
                 "en": "Due today or tomorrow, and every overdue one.",
                 "es": "Las que vencen hoy o mañana, y todas las vencidas.",
                 "zh-Hant": "今天或明天到期的，以及所有逾期的。",
-                "zh-Hans": "今天或明天到期的，以及所有逾期的。"
+                "zh-Hans": "今天或明天到期的，以及所有逾期的。",
+                "de": "Die heute oder morgen fälligen und alle überfälligen."
               }
             },
             "type": "boolean"
@@ -611,13 +649,15 @@
                 "en": "glab command",
                 "es": "Comando glab",
                 "zh-Hant": "glab 指令",
-                "zh-Hans": "glab 命令"
+                "zh-Hans": "glab 命令",
+                "de": "glab-Befehl"
               },
               "help": {
                 "en": "The GitLab CLI, already logged in.",
                 "es": "El CLI de GitLab, con la sesión iniciada.",
                 "zh-Hant": "GitLab CLI，需已登入。",
-                "zh-Hans": "GitLab CLI，需已登录。"
+                "zh-Hans": "GitLab CLI，需已登录。",
+                "de": "Die GitLab-CLI, bereits angemeldet."
               },
               "advanced": true,
               "format": "path"
@@ -634,13 +674,15 @@
                 "en": "Tomorrow too",
                 "es": "También mañana",
                 "zh-Hant": "也顯示明天",
-                "zh-Hans": "也显示明天"
+                "zh-Hans": "也显示明天",
+                "de": "Auch morgen"
               },
               "help": {
                 "en": "Off: only today, for small tiles.",
                 "es": "Apagado: sólo hoy, para teselas pequeñas.",
                 "zh-Hant": "關閉：只顯示今天，適合小方格。",
-                "zh-Hans": "关闭：只显示今天，适合小格子。"
+                "zh-Hans": "关闭：只显示今天，适合小格子。",
+                "de": "Aus: nur heute, für kleine Kacheln."
               }
             },
             "type": "boolean"
@@ -653,12 +695,14 @@
               "label": {
                 "en": "Rows",
                 "es": "Filas",
+                "de": "Zeilen",
                 "zh-Hant": "列數",
                 "zh-Hans": "行数"
               },
               "help": {
                 "en": "0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in \"+N more\".",
                 "es": "0 = las que quepan. Con un número se ven esas, en filas de un tamaño legible (menos si la tesela no da para ellas); el resto se cuenta en «+N más».",
+                "de": "0 = so viele, wie passen. Eine Zahl zeigt so viele, in Zeilen lesbarer Größe (weniger, wenn die Kachel dafür zu klein ist); der Rest wird als „+N weitere“ gezählt.",
                 "zh-Hant": "0 = 盡量放滿。填數字則顯示該數量，並以易讀的大小排列（方格太小時會減少）；其餘的計入「還有 N 個」。",
                 "zh-Hans": "0 = 尽量放满。填数字则显示该数量，并以易读的大小排列（格子太小时会减少）；其余的计入“还有 N 个”。"
               }
@@ -679,13 +723,15 @@
         "en": "Now playing",
         "es": "Sonando",
         "zh-Hant": "正在播放",
-        "zh-Hans": "正在播放"
+        "zh-Hans": "正在播放",
+        "de": "Läuft gerade"
       },
       "description": {
         "en": "The song playing on this computer (any MPRIS player on Linux: Spotify, browser, VLC…), with cover and progress. Hidden while nothing plays.",
         "es": "La canción que suena en este ordenador (cualquier reproductor MPRIS de Linux: Spotify, navegador, VLC…), con portada y avance. Se oculta si no suena nada.",
         "zh-Hant": "這台電腦正在播放的歌曲（Linux 上任何 MPRIS 播放器：Spotify、瀏覽器、VLC…），附封面與進度。沒有播放時會隱藏。",
-        "zh-Hans": "这台电脑正在播放的歌曲（Linux 上任何 MPRIS 播放器：Spotify、浏览器、VLC…），附封面和进度。没有播放时会隐藏。"
+        "zh-Hans": "这台电脑正在播放的歌曲（Linux 上任何 MPRIS 播放器：Spotify、浏览器、VLC…），附封面和进度。没有播放时会隐藏。",
+        "de": "Der Song, der auf diesem Computer läuft (jeder MPRIS-Player unter Linux: Spotify, Browser, VLC…), mit Cover und Fortschritt. Ausgeblendet, solange nichts läuft."
       },
       "icon": "music",
       "category": "media",
@@ -723,7 +769,8 @@
                 "en": "Also while paused",
                 "es": "También en pausa",
                 "zh-Hant": "暫停時也顯示",
-                "zh-Hans": "暂停时也显示"
+                "zh-Hans": "暂停时也显示",
+                "de": "Auch pausiert"
               }
             },
             "type": "boolean"
@@ -737,13 +784,15 @@
                 "en": "Preferred player",
                 "es": "Reproductor preferido",
                 "zh-Hant": "偏好的播放器",
-                "zh-Hans": "首选播放器"
+                "zh-Hans": "首选播放器",
+                "de": "Bevorzugter Player"
               },
               "help": {
                 "en": "Part of its MPRIS name; empty = whichever plays.",
                 "es": "Parte de su nombre MPRIS; vacío = el que suene.",
                 "zh-Hant": "其 MPRIS 名稱的一部分；留空 = 任何正在播放的。",
-                "zh-Hans": "其 MPRIS 名称的一部分；留空 = 任何正在播放的。"
+                "zh-Hans": "其 MPRIS 名称的一部分；留空 = 任何正在播放的。",
+                "de": "Teil seines MPRIS-Namens; leer = der, der gerade spielt."
               },
               "placeholder": "spotify"
             },
@@ -757,7 +806,8 @@
                 "en": "Show the cover",
                 "es": "Mostrar la portada",
                 "zh-Hant": "顯示封面",
-                "zh-Hans": "显示封面"
+                "zh-Hans": "显示封面",
+                "de": "Cover zeigen"
               }
             },
             "type": "boolean"
@@ -774,13 +824,15 @@
         "en": "On this day",
         "es": "Tal día como hoy",
         "zh-Hant": "歷史上的今天",
-        "zh-Hans": "历史上的今天"
+        "zh-Hans": "历史上的今天",
+        "de": "Heute vor … Jahren"
       },
       "description": {
         "en": "Selected anniversaries of today from Wikipedia, one at a time.",
         "es": "Efemérides de hoy seleccionadas por la Wikipedia, una a una.",
         "zh-Hant": "維基百科精選的今日歷史事件，一次一則。",
-        "zh-Hans": "维基百科精选的历史上的今天，一次一条。"
+        "zh-Hans": "维基百科精选的历史上的今天，一次一条。",
+        "de": "Ausgewählte Jahrestage von heute aus der Wikipedia, einer nach dem anderen."
       },
       "icon": "landmark",
       "category": "info",
@@ -818,13 +870,15 @@
                 "en": "Wikipedia language",
                 "es": "Idioma de la Wikipedia",
                 "zh-Hant": "維基百科語言",
-                "zh-Hans": "维基百科语言"
+                "zh-Hans": "维基百科语言",
+                "de": "Wikipedia-Sprache"
               },
               "help": {
                 "en": "A code such as en, es, de; empty = yours. Not every edition has this feed.",
                 "es": "Un código como es, en, de; vacío = el tuyo. No todas las ediciones tienen esta sección.",
                 "zh-Hant": "語言代碼，例如 en、es、de；留空 = 你的語言。並非每個版本都有這個欄目。",
-                "zh-Hans": "语言代码，例如 en、es、de；留空 = 你的语言。并非每个版本都有这个栏目。"
+                "zh-Hans": "语言代码，例如 en、es、de；留空 = 你的语言。并非每个版本都有这个栏目。",
+                "de": "Ein Code wie de, en, es; leer = deine. Nicht jede Ausgabe hat diesen Feed."
               },
               "placeholder": "en"
             },
@@ -839,7 +893,8 @@
                 "en": "Change every",
                 "es": "Cambia cada",
                 "zh-Hant": "更換間隔",
-                "zh-Hans": "切换间隔"
+                "zh-Hans": "切换间隔",
+                "de": "Wechselt alle"
               },
               "unit": "ms"
             },
@@ -858,13 +913,15 @@
         "en": "Air quality",
         "es": "Calidad del aire",
         "zh-Hant": "空氣品質",
-        "zh-Hans": "空气质量"
+        "zh-Hans": "空气质量",
+        "de": "Luftqualität"
       },
       "description": {
         "en": "Air quality index (European or US), particles, gases and pollen where you are (Open-Meteo).",
         "es": "Índice de calidad del aire (europeo o de EE. UU.), partículas, gases y polen donde estás (Open-Meteo).",
         "zh-Hant": "你所在地的空氣品質指標（歐洲或美國）、懸浮微粒、氣體與花粉（Open-Meteo）。",
-        "zh-Hans": "你所在地的空气质量指数（欧洲或美国标准）、颗粒物、气体和花粉（Open-Meteo）。"
+        "zh-Hans": "你所在地的空气质量指数（欧洲或美国标准）、颗粒物、气体和花粉（Open-Meteo）。",
+        "de": "Luftqualitätsindex (europäisch oder US), Feinstaub, Gase und Pollen an deinem Standort (Open-Meteo)."
       },
       "icon": "wind",
       "category": "info",
@@ -905,32 +962,37 @@
                 "en": "Index",
                 "es": "Índice",
                 "zh-Hant": "指標",
-                "zh-Hans": "指数"
+                "zh-Hans": "指数",
+                "de": "Index"
               },
               "help": {
                 "en": "Automatic: the US one for Chinese, Japanese and Korean, the European one otherwise.",
                 "es": "Automático: el de EE. UU. en chino, japonés y coreano; el europeo en los demás idiomas.",
                 "zh-Hant": "自動：中文、日文與韓文使用美國指標，其他語言使用歐洲指標。",
-                "zh-Hans": "自动：中文、日文和韩文使用美国指数，其他语言使用欧洲指数。"
+                "zh-Hans": "自动：中文、日文和韩文使用美国指数，其他语言使用欧洲指数。",
+                "de": "Automatisch: der US-Index für Chinesisch, Japanisch und Koreanisch, sonst der europäische."
               },
               "labels": {
                 "auto": {
                   "en": "Automatic",
                   "es": "Automático",
                   "zh-Hant": "自動",
-                  "zh-Hans": "自动"
+                  "zh-Hans": "自动",
+                  "de": "Automatisch"
                 },
                 "european": {
                   "en": "European (EAQI, 0–100+)",
                   "es": "Europeo (EAQI, 0–100+)",
                   "zh-Hant": "歐洲（EAQI，0–100+）",
-                  "zh-Hans": "欧洲（EAQI，0–100+）"
+                  "zh-Hans": "欧洲（EAQI，0–100+）",
+                  "de": "Europäisch (EAQI, 0–100+)"
                 },
                 "us": {
                   "en": "US (AQI, 0–500)",
                   "es": "EE. UU. (AQI, 0–500)",
                   "zh-Hant": "美國（AQI，0–500）",
-                  "zh-Hans": "美国（AQI，0–500）"
+                  "zh-Hans": "美国（AQI，0–500）",
+                  "de": "US (AQI, 0–500)"
                 }
               }
             },
@@ -950,13 +1012,15 @@
                 "en": "Only from index",
                 "es": "Sólo desde el índice",
                 "zh-Hant": "指標達到才顯示",
-                "zh-Hans": "指数达到才显示"
+                "zh-Hans": "指数达到才显示",
+                "de": "Erst ab Index"
               },
               "help": {
                 "en": "0: always. Otherwise it takes its turn only when the index reaches this, on its own scale (European: 40 is moderate, 60 poor; US: 100 is unhealthy for sensitive groups).",
                 "es": "0: siempre. Si no, sólo sale cuando el índice llega a esto, en su escala (europeo: 40 es regular, 60 desfavorable; EE. UU.: 100 es dañina para grupos sensibles).",
                 "zh-Hant": "0：一律顯示。否則只在指標達到此值時才輪到它，依各自的標準（歐洲：40 為普通，60 為不良；美國：100 為對敏感族群不健康）。",
-                "zh-Hans": "0：始终显示。否则只在指数达到此值时才轮到它，按各自的标准（欧洲：40 为中等，60 为较差；美国：100 为对敏感人群不健康）。"
+                "zh-Hans": "0：始终显示。否则只在指数达到此值时才轮到它，按各自的标准（欧洲：40 为中等，60 为较差；美国：100 为对敏感人群不健康）。",
+                "de": "0: immer. Sonst ist sie nur an der Reihe, wenn der Index diesen Wert erreicht, auf seiner eigenen Skala (europäisch: 40 ist mäßig, 60 schlecht; US: 100 ist ungesund für empfindliche Gruppen)."
               }
             },
             "type": "integer",
@@ -971,7 +1035,8 @@
                 "en": "Show pollen",
                 "es": "Mostrar el polen",
                 "zh-Hant": "顯示花粉",
-                "zh-Hans": "显示花粉"
+                "zh-Hans": "显示花粉",
+                "de": "Pollen zeigen"
               }
             },
             "type": "boolean"
@@ -984,12 +1049,14 @@
               "label": {
                 "en": "Latitude",
                 "es": "Latitud",
+                "de": "Breitengrad",
                 "zh-Hant": "緯度",
                 "zh-Hans": "纬度"
               },
               "help": {
                 "en": "Leave latitude and longitude at 0 to use the place in Settings.",
                 "es": "Con latitud y longitud a 0 se usa el lugar de los ajustes.",
+                "de": "Breiten- und Längengrad auf 0 lassen, um den Ort aus den Einstellungen zu verwenden.",
                 "zh-Hant": "緯度和經度保持 0 即使用設定中的地點。",
                 "zh-Hans": "纬度和经度保持为 0 时使用设置中的地点。"
               },
@@ -1008,6 +1075,7 @@
               "label": {
                 "en": "Longitude",
                 "es": "Longitud",
+                "de": "Längengrad",
                 "zh-Hant": "經度",
                 "zh-Hans": "经度"
               },
@@ -1031,13 +1099,15 @@
         "en": "Earthquakes nearby",
         "es": "Terremotos cercanos",
         "zh-Hant": "附近地震",
-        "zh-Hans": "附近地震"
+        "zh-Hans": "附近地震",
+        "de": "Erdbeben in der Nähe"
       },
       "description": {
         "en": "Recent earthquakes around you (EMSC) on a polar map, with magnitude, place and time. Hidden when there are none (you can change that).",
         "es": "Los terremotos recientes a tu alrededor (EMSC) en un mapa polar, con magnitud, lugar y hora. Se oculta si no hay ninguno (se puede cambiar).",
         "zh-Hant": "在極座標地圖上顯示你周圍的近期地震（EMSC），附規模、地點與時間。沒有地震時會隱藏（可以更改）。",
-        "zh-Hans": "在极坐标地图上显示你周围的近期地震（EMSC），附震级、地点和时间。没有地震时会隐藏（可以更改）。"
+        "zh-Hans": "在极坐标地图上显示你周围的近期地震（EMSC），附震级、地点和时间。没有地震时会隐藏（可以更改）。",
+        "de": "Aktuelle Erdbeben rund um dich (EMSC) auf einer Polarkarte, mit Magnitude, Ort und Zeit. Ausgeblendet, wenn es keine gibt (lässt sich ändern)."
       },
       "icon": "activity",
       "category": "info",
@@ -1077,7 +1147,8 @@
                 "en": "Radius",
                 "es": "Radio",
                 "zh-Hant": "半徑",
-                "zh-Hans": "半径"
+                "zh-Hans": "半径",
+                "de": "Radius"
               },
               "unit": "km",
               "step": 10
@@ -1094,7 +1165,8 @@
                 "en": "Days back",
                 "es": "Días hacia atrás",
                 "zh-Hant": "回溯天數",
-                "zh-Hans": "回溯天数"
+                "zh-Hans": "回溯天数",
+                "de": "Tage zurück"
               },
               "unit": "d"
             },
@@ -1110,7 +1182,8 @@
                 "en": "Minimum magnitude",
                 "es": "Magnitud mínima",
                 "zh-Hant": "最小規模",
-                "zh-Hans": "最小震级"
+                "zh-Hans": "最小震级",
+                "de": "Mindestmagnitude"
               },
               "step": 0.1
             },
@@ -1126,12 +1199,14 @@
               "label": {
                 "en": "Rows",
                 "es": "Filas",
+                "de": "Zeilen",
                 "zh-Hant": "列數",
                 "zh-Hans": "行数"
               },
               "help": {
                 "en": "0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in \"+N more\".",
                 "es": "0 = las que quepan. Con un número se ven esas, en filas de un tamaño legible (menos si la tesela no da para ellas); el resto se cuenta en «+N más».",
+                "de": "0 = so viele, wie passen. Eine Zahl zeigt so viele, in Zeilen lesbarer Größe (weniger, wenn die Kachel dafür zu klein ist); der Rest wird als „+N weitere“ gezählt.",
                 "zh-Hant": "0 = 盡量放滿。填數字則顯示該數量，並以易讀的大小排列（方格太小時會減少）；其餘的計入「還有 N 個」。",
                 "zh-Hans": "0 = 尽量放满。填数字则显示该数量，并以易读的大小排列（格子太小时会减少）；其余的计入“还有 N 个”。"
               }
@@ -1148,12 +1223,14 @@
               "label": {
                 "en": "Latitude",
                 "es": "Latitud",
+                "de": "Breitengrad",
                 "zh-Hant": "緯度",
                 "zh-Hans": "纬度"
               },
               "help": {
                 "en": "Leave latitude and longitude at 0 to use the place in Settings.",
                 "es": "Con latitud y longitud a 0 se usa el lugar de los ajustes.",
+                "de": "Breiten- und Längengrad auf 0 lassen, um den Ort aus den Einstellungen zu verwenden.",
                 "zh-Hant": "緯度和經度保持 0 即使用設定中的地點。",
                 "zh-Hans": "纬度和经度保持为 0 时使用设置中的地点。"
               },
@@ -1172,6 +1249,7 @@
               "label": {
                 "en": "Longitude",
                 "es": "Longitud",
+                "de": "Längengrad",
                 "zh-Hant": "經度",
                 "zh-Hans": "经度"
               },
@@ -1195,13 +1273,15 @@
         "en": "Rain radar",
         "es": "Radar de lluvia",
         "zh-Hant": "降雨雷達",
-        "zh-Hans": "降雨雷达"
+        "zh-Hans": "降雨雷达",
+        "de": "Regenradar"
       },
       "description": {
         "en": "Latest rain radar (RainViewer) over a dark OpenStreetMap map, home in the centre. By default only shows while it rains nearby.",
         "es": "El último radar de lluvia (RainViewer) sobre un mapa oscuro de OpenStreetMap, con casa en el centro. Por defecto sólo sale si llueve cerca.",
         "zh-Hant": "最新的降雨雷達（RainViewer），疊在深色的 OpenStreetMap 地圖上，家在中央。預設只在附近下雨時顯示。",
-        "zh-Hans": "最新的降雨雷达（RainViewer），叠加在深色的 OpenStreetMap 地图上，家在中心。默认只在附近下雨时显示。"
+        "zh-Hans": "最新的降雨雷达（RainViewer），叠加在深色的 OpenStreetMap 地图上，家在中心。默认只在附近下雨时显示。",
+        "de": "Das aktuelle Regenradar (RainViewer) über einer dunklen OpenStreetMap-Karte, dein Zuhause in der Mitte. Standardmäßig nur sichtbar, wenn es in der Nähe regnet."
       },
       "icon": "cloud-rain",
       "category": "info",
@@ -1240,7 +1320,8 @@
                 "en": "Only while it rains nearby",
                 "es": "Sólo si llueve cerca",
                 "zh-Hant": "只在附近下雨時",
-                "zh-Hans": "仅在附近下雨时"
+                "zh-Hans": "仅在附近下雨时",
+                "de": "Nur wenn es in der Nähe regnet"
               }
             },
             "type": "boolean"
@@ -1253,12 +1334,14 @@
               "label": {
                 "en": "Latitude",
                 "es": "Latitud",
+                "de": "Breitengrad",
                 "zh-Hant": "緯度",
                 "zh-Hans": "纬度"
               },
               "help": {
                 "en": "Leave latitude and longitude at 0 to use the place in Settings.",
                 "es": "Con latitud y longitud a 0 se usa el lugar de los ajustes.",
+                "de": "Breiten- und Längengrad auf 0 lassen, um den Ort aus den Einstellungen zu verwenden.",
                 "zh-Hant": "緯度和經度保持 0 即使用設定中的地點。",
                 "zh-Hans": "纬度和经度保持为 0 时使用设置中的地点。"
               },
@@ -1277,6 +1360,7 @@
               "label": {
                 "en": "Longitude",
                 "es": "Longitud",
+                "de": "Längengrad",
                 "zh-Hant": "經度",
                 "zh-Hans": "经度"
               },
@@ -1300,13 +1384,15 @@
         "en": "Traffic map",
         "es": "Mapa de tráfico",
         "zh-Hant": "交通地圖",
-        "zh-Hans": "路况地图"
+        "zh-Hans": "路况地图",
+        "de": "Verkehrskarte"
       },
       "description": {
         "en": "Live traffic flow around your place on a dark TomTom map.",
         "es": "Tráfico en tiempo real alrededor de tu ubicación sobre un mapa oscuro de TomTom.",
         "zh-Hant": "在深色的 TomTom 地圖上顯示你所在地周圍的即時車流。",
-        "zh-Hans": "在深色的 TomTom 地图上显示你所在地周围的实时路况。"
+        "zh-Hans": "在深色的 TomTom 地图上显示你所在地周围的实时路况。",
+        "de": "Der Verkehrsfluss rund um deinen Standort live auf einer dunklen TomTom-Karte."
       },
       "icon": "car",
       "category": "info",
@@ -1346,13 +1432,15 @@
                 "en": "TomTom API key",
                 "es": "Clave API de TomTom",
                 "zh-Hant": "TomTom API 金鑰",
-                "zh-Hans": "TomTom API 密钥"
+                "zh-Hans": "TomTom API 密钥",
+                "de": "TomTom-API-Schlüssel"
               },
               "help": {
                 "en": "Create a free account at tomtom.com and enable Map Display and Traffic APIs.",
                 "es": "Crea una cuenta gratuita en tomtom.com y habilita las API Map Display y Traffic.",
                 "zh-Hant": "在 tomtom.com 建立免費帳號，並啟用 Map Display 和 Traffic API。",
-                "zh-Hans": "在 tomtom.com 注册免费账号，并启用 Map Display 和 Traffic API。"
+                "zh-Hans": "在 tomtom.com 注册免费账号，并启用 Map Display 和 Traffic API。",
+                "de": "Lege ein kostenloses Konto auf tomtom.com an und aktiviere die APIs Map Display und Traffic."
               },
               "secret": true
             },
@@ -1368,13 +1456,15 @@
                 "en": "Zoom",
                 "es": "Zoom",
                 "zh-Hant": "縮放",
-                "zh-Hans": "缩放"
+                "zh-Hans": "缩放",
+                "de": "Zoom"
               },
               "help": {
                 "en": "Higher numbers show a smaller area in more detail.",
                 "es": "Un número mayor muestra una zona más pequeña con más detalle.",
                 "zh-Hant": "數字越大，顯示的範圍越小、細節越多。",
-                "zh-Hans": "数字越大，显示的范围越小、细节越多。"
+                "zh-Hans": "数字越大，显示的范围越小、细节越多。",
+                "de": "Höhere Zahlen zeigen einen kleineren Bereich mit mehr Details."
               }
             },
             "type": "integer",
@@ -1389,12 +1479,14 @@
               "label": {
                 "en": "Latitude",
                 "es": "Latitud",
+                "de": "Breitengrad",
                 "zh-Hant": "緯度",
                 "zh-Hans": "纬度"
               },
               "help": {
                 "en": "Leave latitude and longitude at 0 to use the place in Settings.",
                 "es": "Con latitud y longitud a 0 se usa el lugar de los ajustes.",
+                "de": "Breiten- und Längengrad auf 0 lassen, um den Ort aus den Einstellungen zu verwenden.",
                 "zh-Hant": "緯度和經度保持 0 即使用設定中的地點。",
                 "zh-Hans": "纬度和经度保持为 0 时使用设置中的地点。"
               },
@@ -1413,6 +1505,7 @@
               "label": {
                 "en": "Longitude",
                 "es": "Longitud",
+                "de": "Längengrad",
                 "zh-Hant": "經度",
                 "zh-Hans": "经度"
               },

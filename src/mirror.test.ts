@@ -62,7 +62,8 @@ test('compliments: by time of day, stable for changeMs, built-in phrases when no
   const lang = (locale: string) => createBaseContext({ now: 0, locale }).pickLanguage;
   assert.ok(phrasesFor(empty, lang('es-ES')).morning.includes('Buenos días.'));
   assert.ok(phrasesFor(empty, lang('en-GB')).morning.includes('Good morning.'));
-  assert.ok(phrasesFor(empty, lang('de')).morning.includes('Good morning.'), 'any other language: English');
+  assert.ok(phrasesFor(empty, lang('de-AT')).morning.includes('Guten Morgen.'));
+  assert.ok(phrasesFor(empty, lang('fr')).morning.includes('Good morning.'), 'any other language: English');
   assert.equal(phrasesFor(empty, lang('zh-TW')), BUILTIN_PHRASES['zh-Hant']);
   assert.equal(phrasesFor(empty, lang('zh-CN')), BUILTIN_PHRASES['zh-Hans']);
   assert.equal(phrasesFor(p, lang('es')), p);
@@ -109,7 +110,7 @@ test('now playing: reads gdbus output (GVariant as text) and picks the player', 
 
 test('air quality: European index bands and pollen levels', () => {
   assert.deepEqual([0, 20, 21, 55, 79, 100, 150].map((a) => aqiCategory(a).level), [0, 0, 1, 2, 3, 4, 5]);
-  assert.deepEqual(aqiCategory(25).label, { en: 'Fair', es: 'Razonablemente buena', 'zh-Hant': '尚可', 'zh-Hans': '一般' });
+  assert.deepEqual(aqiCategory(25).label, { en: 'Fair', es: 'Razonablemente buena', 'zh-Hant': '尚可', 'zh-Hans': '一般', de: 'Annehmbar' });
   assert.deepEqual([40, 51, 120, 160, 250, 400].map((a) => aqiCategory(a, 'us').level), [0, 1, 2, 3, 4, 5]);
   assert.equal(parseAir({ us_aqi: 87.4, european_aqi: 30 }, 'us').aqi, 87);
   assert.equal(parseAir({ us_aqi: 87.4, european_aqi: 30 }).aqi, 30);
@@ -167,6 +168,8 @@ test('earthquakes: distance and bearing from home, EMSC newest first, localized 
   assert.equal(compass(225, es), 'SO');
   assert.equal(compass(225, en), 'SW');
   assert.equal(compass(270, es), 'O');
+  assert.equal(compass(45, (x) => localize(x, 'de')), 'NO', 'German: O is east, NO northeast');
+  assert.equal(compass(225, (x) => localize(x, 'de')), 'SW');
   const q = parseEmsc({
     features: [
       { id: 'a', properties: { time: '2026-10-07T08:45:12.02Z', mag: 1.6, lat: 38.2003, lon: -2.3007, depth: 0 } },

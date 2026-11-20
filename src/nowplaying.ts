@@ -116,21 +116,22 @@ function drawPlaceholder(g: Graphics, x: number, y: number, side: number, theme:
 
 export const nowplaying = defineWidget({
   id: 'nowplaying',
-  name: { en: 'Now playing', es: 'Sonando', 'zh-Hant': '正在播放', 'zh-Hans': '正在播放' },
+  name: { en: 'Now playing', es: 'Sonando', 'zh-Hant': '正在播放', 'zh-Hans': '正在播放', de: 'Läuft gerade' },
   description: {
     en: 'The song playing on this computer (any MPRIS player on Linux: Spotify, browser, VLC…), with cover and progress. Hidden while nothing plays.',
     es: 'La canción que suena en este ordenador (cualquier reproductor MPRIS de Linux: Spotify, navegador, VLC…), con portada y avance. Se oculta si no suena nada.',
     'zh-Hant': '這台電腦正在播放的歌曲（Linux 上任何 MPRIS 播放器：Spotify、瀏覽器、VLC…），附封面與進度。沒有播放時會隱藏。',
     'zh-Hans': '这台电脑正在播放的歌曲（Linux 上任何 MPRIS 播放器：Spotify、浏览器、VLC…），附封面和进度。没有播放时会隐藏。',
+    de: 'Der Song, der auf diesem Computer läuft (jeder MPRIS-Player unter Linux: Spotify, Browser, VLC…), mit Cover und Fortschritt. Ausgeblendet, solange nichts läuft.',
   },
   icon: 'music',
   category: 'media',
   tags: ['magicmirror', 'spotify', 'mpris'],
   size: { min: { w: 280, h: 100 }, preferred: { w: 600, h: 220 } },
   options: t.object({
-    showPaused: t.boolean({ label: { en: 'Also while paused', es: 'También en pausa', 'zh-Hant': '暫停時也顯示', 'zh-Hans': '暂停时也显示' } }),
-    prefer: t.string({ placeholder: 'spotify', label: { en: 'Preferred player', es: 'Reproductor preferido', 'zh-Hant': '偏好的播放器', 'zh-Hans': '首选播放器' }, help: { en: 'Part of its MPRIS name; empty = whichever plays.', es: 'Parte de su nombre MPRIS; vacío = el que suene.', 'zh-Hant': '其 MPRIS 名稱的一部分；留空 = 任何正在播放的。', 'zh-Hans': '其 MPRIS 名称的一部分；留空 = 任何正在播放的。' } }),
-    showCover: t.boolean({ default: true, label: { en: 'Show the cover', es: 'Mostrar la portada', 'zh-Hant': '顯示封面', 'zh-Hans': '显示封面' } }),
+    showPaused: t.boolean({ label: { en: 'Also while paused', es: 'También en pausa', 'zh-Hant': '暫停時也顯示', 'zh-Hans': '暂停时也显示', de: 'Auch pausiert' } }),
+    prefer: t.string({ placeholder: 'spotify', label: { en: 'Preferred player', es: 'Reproductor preferido', 'zh-Hant': '偏好的播放器', 'zh-Hans': '首选播放器', de: 'Bevorzugter Player' }, help: { en: 'Part of its MPRIS name; empty = whichever plays.', es: 'Parte de su nombre MPRIS; vacío = el que suene.', 'zh-Hant': '其 MPRIS 名稱的一部分；留空 = 任何正在播放的。', 'zh-Hans': '其 MPRIS 名称的一部分；留空 = 任何正在播放的。', de: 'Teil seines MPRIS-Namens; leer = der, der gerade spielt.' } }),
+    showCover: t.boolean({ default: true, label: { en: 'Show the cover', es: 'Mostrar la portada', 'zh-Hant': '顯示封面', 'zh-Hans': '显示封面', de: 'Cover zeigen' } }),
   }),
   // Progress is extrapolated in render; what takes a poll to show is a new
   // song or player. Each poll is several `gdbus` calls.

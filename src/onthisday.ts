@@ -55,7 +55,7 @@ export function wikiVariant(lang: string, locale: string): string | undefined {
 
 /** "53 years ago" / "hace 53 años". */
 export function yearsAgo(n: number, plural: BaseContext['plural']): string {
-  return plural(n, { en: { one: '{n} year ago', other: '{n} years ago' }, es: { one: 'hace {n} año', other: 'hace {n} años' }, 'zh-Hant': { other: '{n} 年前' }, 'zh-Hans': { other: '{n} 年前' } });
+  return plural(n, { en: { one: '{n} year ago', other: '{n} years ago' }, es: { one: 'hace {n} año', other: 'hace {n} años' }, 'zh-Hant': { other: '{n} 年前' }, 'zh-Hans': { other: '{n} 年前' }, de: { one: 'vor {n} Jahr', other: 'vor {n} Jahren' } });
 }
 
 const DEMO: Ephemeris[] = [
@@ -99,15 +99,15 @@ function layout(text: string, w: number, room: number, start: number, family: st
 
 export const onthisday = defineWidget({
   id: 'onthisday',
-  name: { en: 'On this day', es: 'Tal día como hoy', 'zh-Hant': '歷史上的今天', 'zh-Hans': '历史上的今天' },
-  description: { en: 'Selected anniversaries of today from Wikipedia, one at a time.', es: 'Efemérides de hoy seleccionadas por la Wikipedia, una a una.', 'zh-Hant': '維基百科精選的今日歷史事件，一次一則。', 'zh-Hans': '维基百科精选的历史上的今天，一次一条。' },
+  name: { en: 'On this day', es: 'Tal día como hoy', 'zh-Hant': '歷史上的今天', 'zh-Hans': '历史上的今天', de: 'Heute vor … Jahren' },
+  description: { en: 'Selected anniversaries of today from Wikipedia, one at a time.', es: 'Efemérides de hoy seleccionadas por la Wikipedia, una a una.', 'zh-Hant': '維基百科精選的今日歷史事件，一次一則。', 'zh-Hans': '维基百科精选的历史上的今天，一次一条。', de: 'Ausgewählte Jahrestage von heute aus der Wikipedia, einer nach dem anderen.' },
   icon: 'landmark',
   category: 'info',
   tags: ['magicmirror', 'history', 'wikipedia'],
   size: { min: { w: 240, h: 120 }, preferred: { w: 600, h: 220 } },
   options: t.object({
-    lang: t.string({ placeholder: 'en', maxLength: 3, label: { en: 'Wikipedia language', es: 'Idioma de la Wikipedia', 'zh-Hant': '維基百科語言', 'zh-Hans': '维基百科语言' }, help: { en: 'A code such as en, es, de; empty = yours. Not every edition has this feed.', es: 'Un código como es, en, de; vacío = el tuyo. No todas las ediciones tienen esta sección.', 'zh-Hant': '語言代碼，例如 en、es、de；留空 = 你的語言。並非每個版本都有這個欄目。', 'zh-Hans': '语言代码，例如 en、es、de；留空 = 你的语言。并非每个版本都有这个栏目。' } }),
-    changeMs: t.duration({ default: 10 * 60_000, min: 60_000, label: { en: 'Change every', es: 'Cambia cada', 'zh-Hant': '更換間隔', 'zh-Hans': '切换间隔' } }),
+    lang: t.string({ placeholder: 'en', maxLength: 3, label: { en: 'Wikipedia language', es: 'Idioma de la Wikipedia', 'zh-Hant': '維基百科語言', 'zh-Hans': '维基百科语言', de: 'Wikipedia-Sprache' }, help: { en: 'A code such as en, es, de; empty = yours. Not every edition has this feed.', es: 'Un código como es, en, de; vacío = el tuyo. No todas las ediciones tienen esta sección.', 'zh-Hant': '語言代碼，例如 en、es、de；留空 = 你的語言。並非每個版本都有這個欄目。', 'zh-Hans': '语言代码，例如 en、es、de；留空 = 你的语言。并非每个版本都有这个栏目。', de: 'Ein Code wie de, en, es; leer = deine. Nicht jede Ausgabe hat diesen Feed.' } }),
+    changeMs: t.duration({ default: 10 * 60_000, min: 60_000, label: { en: 'Change every', es: 'Cambia cada', 'zh-Hant': '更換間隔', 'zh-Hans': '切换间隔', de: 'Wechselt alle' } }),
   }),
   intervalMs: 3 * 3600_000,
   redraw: 'minute',
