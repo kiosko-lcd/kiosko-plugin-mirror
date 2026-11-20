@@ -20,6 +20,7 @@ export default definePlugin({
   id: 'mirror',
   name: { en: 'Mirror cards', es: 'Tarjetas Mirror', 'zh-Hant': 'Mirror 卡片', 'zh-Hans': 'Mirror 卡片' },
   version: '0.2.1',
+  languages: ['en', 'es', 'zh-Hant', 'zh-Hans'],
   sdk: '^0.2.0',
   permissions: {
     network: ['air-quality-api.open-meteo.com', 'www.seismicportal.eu', 'api.rainviewer.com', 'tile.openstreetmap.org', 'nominatim.openstreetmap.org', '*.wikipedia.org', 'api.tomtom.com'],
