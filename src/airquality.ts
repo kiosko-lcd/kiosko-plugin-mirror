@@ -9,12 +9,12 @@ import { defineWidget, placeOf, t, type Localized } from '@kiosko/sdk';
 import { clamp, fmt, NO_PLACE, placeOptions, within } from './util.ts';
 
 export const POLLEN = {
-  grass_pollen: { en: 'Grass', es: 'Gramíneas' },
-  olive_pollen: { en: 'Olive', es: 'Olivo' },
-  birch_pollen: { en: 'Birch', es: 'Abedul' },
-  alder_pollen: { en: 'Alder', es: 'Aliso' },
-  mugwort_pollen: { en: 'Mugwort', es: 'Artemisa' },
-  ragweed_pollen: { en: 'Ragweed', es: 'Ambrosía' },
+  grass_pollen: { en: 'Grass', es: 'Gramíneas', 'zh-Hant': '禾草', 'zh-Hans': '禾草' },
+  olive_pollen: { en: 'Olive', es: 'Olivo', 'zh-Hant': '橄欖', 'zh-Hans': '橄榄' },
+  birch_pollen: { en: 'Birch', es: 'Abedul', 'zh-Hant': '樺樹', 'zh-Hans': '桦树' },
+  alder_pollen: { en: 'Alder', es: 'Aliso', 'zh-Hant': '赤楊', 'zh-Hans': '桤木' },
+  mugwort_pollen: { en: 'Mugwort', es: 'Artemisa', 'zh-Hant': '艾草', 'zh-Hans': '艾蒿' },
+  ragweed_pollen: { en: 'Ragweed', es: 'Ambrosía', 'zh-Hant': '豚草', 'zh-Hans': '豚草' },
 } as const satisfies Record<string, Localized>;
 export type PollenKey = keyof typeof POLLEN;
 
@@ -33,22 +33,22 @@ export interface AirData {
 
 /** The bands of the European index; Spanish names as the MITECO uses them. */
 const BANDS: { max: number; label: Localized }[] = [
-  { max: 20, label: { en: 'Good', es: 'Buena' } },
-  { max: 40, label: { en: 'Fair', es: 'Razonablemente buena' } },
-  { max: 60, label: { en: 'Moderate', es: 'Regular' } },
-  { max: 80, label: { en: 'Poor', es: 'Desfavorable' } },
-  { max: 100, label: { en: 'Very poor', es: 'Muy desfavorable' } },
-  { max: Infinity, label: { en: 'Extremely poor', es: 'Extremadamente desfavorable' } },
+  { max: 20, label: { en: 'Good', es: 'Buena', 'zh-Hant': '良好', 'zh-Hans': '良好' } },
+  { max: 40, label: { en: 'Fair', es: 'Razonablemente buena', 'zh-Hant': '尚可', 'zh-Hans': '一般' } },
+  { max: 60, label: { en: 'Moderate', es: 'Regular', 'zh-Hant': '普通', 'zh-Hans': '中等' } },
+  { max: 80, label: { en: 'Poor', es: 'Desfavorable', 'zh-Hant': '不良', 'zh-Hans': '较差' } },
+  { max: 100, label: { en: 'Very poor', es: 'Muy desfavorable', 'zh-Hant': '很差', 'zh-Hans': '很差' } },
+  { max: Infinity, label: { en: 'Extremely poor', es: 'Extremadamente desfavorable', 'zh-Hant': '極差', 'zh-Hans': '极差' } },
 ];
 
 /** The bands of the US EPA index (AirNow's names). */
 const US_BANDS: { max: number; label: Localized }[] = [
-  { max: 50, label: { en: 'Good', es: 'Buena' } },
-  { max: 100, label: { en: 'Moderate', es: 'Moderada' } },
-  { max: 150, label: { en: 'Unhealthy for sensitive groups', es: 'Dañina para grupos sensibles' } },
-  { max: 200, label: { en: 'Unhealthy', es: 'Dañina' } },
-  { max: 300, label: { en: 'Very unhealthy', es: 'Muy dañina' } },
-  { max: Infinity, label: { en: 'Hazardous', es: 'Peligrosa' } },
+  { max: 50, label: { en: 'Good', es: 'Buena', 'zh-Hant': '良好', 'zh-Hans': '良好' } },
+  { max: 100, label: { en: 'Moderate', es: 'Moderada', 'zh-Hant': '普通', 'zh-Hans': '中等' } },
+  { max: 150, label: { en: 'Unhealthy for sensitive groups', es: 'Dañina para grupos sensibles', 'zh-Hant': '對敏感族群不健康', 'zh-Hans': '对敏感人群不健康' } },
+  { max: 200, label: { en: 'Unhealthy', es: 'Dañina', 'zh-Hant': '對所有族群不健康', 'zh-Hans': '不健康' } },
+  { max: 300, label: { en: 'Very unhealthy', es: 'Muy dañina', 'zh-Hant': '非常不健康', 'zh-Hans': '非常不健康' } },
+  { max: Infinity, label: { en: 'Hazardous', es: 'Peligrosa', 'zh-Hant': '危害', 'zh-Hans': '危险' } },
 ];
 
 /** The index's name on the card. */
@@ -66,9 +66,9 @@ export function pollenLevel(grains: number): 'low' | 'moderate' | 'high' {
 }
 
 const LEVEL_NAME: Record<ReturnType<typeof pollenLevel>, Localized> = {
-  low: { en: 'low', es: 'bajo' },
-  moderate: { en: 'moderate', es: 'moderado' },
-  high: { en: 'high', es: 'alto' },
+  low: { en: 'low', es: 'bajo', 'zh-Hant': '低', 'zh-Hans': '低' },
+  moderate: { en: 'moderate', es: 'moderado', 'zh-Hant': '中', 'zh-Hans': '中' },
+  high: { en: 'high', es: 'alto', 'zh-Hant': '高', 'zh-Hans': '高' },
 };
 
 /** The indexes' own colour scales, from green to purple (the US one ends in maroon). */
@@ -89,28 +89,30 @@ const DEMO: AirData = { index: 'european', aqi: 34, pm2_5: 8.2, pm10: 17.4, ozon
 
 export const airquality = defineWidget({
   id: 'airquality',
-  name: { en: 'Air quality', es: 'Calidad del aire' },
-  description: { en: 'Air quality index (European or US), particles, gases and pollen where you are (Open-Meteo).', es: 'Índice de calidad del aire (europeo o de EE. UU.), partículas, gases y polen donde estás (Open-Meteo).' },
+  name: { en: 'Air quality', es: 'Calidad del aire', 'zh-Hant': '空氣品質', 'zh-Hans': '空气质量' },
+  description: { en: 'Air quality index (European or US), particles, gases and pollen where you are (Open-Meteo).', es: 'Índice de calidad del aire (europeo o de EE. UU.), partículas, gases y polen donde estás (Open-Meteo).', 'zh-Hant': '你所在地的空氣品質指標（歐洲或美國）、懸浮微粒、氣體與花粉（Open-Meteo）。', 'zh-Hans': '你所在地的空气质量指数（欧洲或美国标准）、颗粒物、气体和花粉（Open-Meteo）。' },
   icon: 'wind',
   category: 'info',
   tags: ['magicmirror', 'weather', 'pollen'],
   size: { min: { w: 240, h: 130 }, preferred: { w: 400, h: 300 } },
   options: t.object({
     index: t.enum(['european', 'us'] as const, {
-      label: { en: 'Index', es: 'Índice' },
-      labels: { european: { en: 'European (EAQI, 0–100+)', es: 'Europeo (EAQI, 0–100+)' }, us: { en: 'US (AQI, 0–500)', es: 'EE. UU. (AQI, 0–500)' } },
+      label: { en: 'Index', es: 'Índice', 'zh-Hant': '指標', 'zh-Hans': '指数' },
+      labels: { european: { en: 'European (EAQI, 0–100+)', es: 'Europeo (EAQI, 0–100+)', 'zh-Hant': '歐洲（EAQI，0–100+）', 'zh-Hans': '欧洲（EAQI，0–100+）' }, us: { en: 'US (AQI, 0–500)', es: 'EE. UU. (AQI, 0–500)', 'zh-Hant': '美國（AQI，0–500）', 'zh-Hans': '美国（AQI，0–500）' } },
     }),
     onlyAbove: t.integer({
       default: 0,
       min: 0,
       max: 500,
-      label: { en: 'Only from index', es: 'Sólo desde el índice' },
+      label: { en: 'Only from index', es: 'Sólo desde el índice', 'zh-Hant': '指標達到才顯示', 'zh-Hans': '指数达到才显示' },
       help: {
         en: '0: always. Otherwise it takes its turn only when the index reaches this, on its own scale (European: 40 is moderate, 60 poor; US: 100 is unhealthy for sensitive groups).',
         es: '0: siempre. Si no, sólo sale cuando el índice llega a esto, en su escala (europeo: 40 es regular, 60 desfavorable; EE. UU.: 100 es dañina para grupos sensibles).',
+        'zh-Hant': '0：一律顯示。否則只在指標達到此值時才輪到它，依各自的標準（歐洲：40 為普通，60 為不良；美國：100 為對敏感族群不健康）。',
+        'zh-Hans': '0：始终显示。否则只在指数达到此值时才轮到它，按各自的标准（欧洲：40 为中等，60 为较差；美国：100 为对敏感人群不健康）。',
       },
     }),
-    showPollen: t.boolean({ default: true, label: { en: 'Show pollen', es: 'Mostrar el polen' } }),
+    showPollen: t.boolean({ default: true, label: { en: 'Show pollen', es: 'Mostrar el polen', 'zh-Hant': '顯示花粉', 'zh-Hans': '显示花粉' } }),
     ...placeOptions(),
   }),
   intervalMs: 30 * 60_000,
@@ -131,13 +133,13 @@ export const airquality = defineWidget({
     const col = LEVEL_COLOR[index][cat.level]!;
     const label = tr(cat.label);
     const indexName = INDEX_NAME[index];
-    const gases: [string, number][] = [[tr({ en: 'PM2.5', es: 'PM2,5' }), data.pm2_5], ['PM10', data.pm10], ['O₃', data.ozone], ['NO₂', data.no2]];
+    const gases: [string, number][] = [[tr({ en: 'PM2.5', es: 'PM2,5', 'zh-Hant': 'PM2.5', 'zh-Hans': 'PM2.5' }), data.pm2_5], ['PM10', data.pm10], ['O₃', data.ozone], ['NO₂', data.no2]];
     const pollen = (Object.entries(data.pollen) as [PollenKey, number][]).sort((a, b) => b[1] - a[1]);
 
     /** Pollen as name over level, left to right, as many as fit in `w`. */
     const drawPollen = (x0: number, y: number, w: number, ps: number, vertical: boolean) => {
       if (!pollen.length) {
-        const msg = tr({ en: 'No pollen in the air', es: 'Sin polen en el aire' });
+        const msg = tr({ en: 'No pollen in the air', es: 'Sin polen en el aire', 'zh-Hant': '空氣中沒有花粉', 'zh-Hans': '空气中没有花粉' });
         kit.drawTracked(g, kit.truncate(g, msg, w, { size: ps, family: fonts.sans }), x0, y, { size: ps, family: fonts.sans, color: colors.inkDim });
         return;
       }

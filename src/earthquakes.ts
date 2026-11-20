@@ -41,18 +41,19 @@ export function distanceBearing(a: { lat: number; lon: number }, b: { lat: numbe
   return { km, bearing: ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360 };
 }
 
+// Chinese names the eight points with characters (東/东 the only one that differs between scripts).
 const POINTS: Localized[] = [
-  'N',
-  'NE',
-  'E',
-  'SE',
-  'S',
-  { en: 'SW', es: 'SO' },
-  { en: 'W', es: 'O' },
-  { en: 'NW', es: 'NO' },
+  { en: 'N', es: 'N', 'zh-Hant': '北', 'zh-Hans': '北' },
+  { en: 'NE', es: 'NE', 'zh-Hant': '東北', 'zh-Hans': '东北' },
+  { en: 'E', es: 'E', 'zh-Hant': '東', 'zh-Hans': '东' },
+  { en: 'SE', es: 'SE', 'zh-Hant': '東南', 'zh-Hans': '东南' },
+  { en: 'S', es: 'S', 'zh-Hant': '南', 'zh-Hans': '南' },
+  { en: 'SW', es: 'SO', 'zh-Hant': '西南', 'zh-Hans': '西南' },
+  { en: 'W', es: 'O', 'zh-Hant': '西', 'zh-Hans': '西' },
+  { en: 'NW', es: 'NO', 'zh-Hant': '西北', 'zh-Hans': '西北' },
 ];
 
-/** "N", "NE", "SW"… (Spanish uses O for west: "SO", "NO"). */
+/** "N", "NE", "SW"… (Spanish uses O for west: "SO", "NO"; Chinese 東北, 西南…). */
 export function compass(bearing: number, tr: (text: Localized) => string): string {
   return tr(POINTS[Math.round(bearing / 45) % 8]!);
 }
@@ -89,7 +90,7 @@ async function placeName(lat: number, lon: number, locale: string, tr: (text: Lo
     if (!res.ok) return null; // Not cached: retried on the next round.
     const j = (await res.json()) as { name?: string; error?: string; address?: Record<string, string> };
     const a = j.address ?? {};
-    const name = j.error ? tr({ en: 'at sea', es: 'en el mar' }) : (a.village ?? a.town ?? a.city ?? a.municipality ?? j.name ?? null);
+    const name = j.error ? tr({ en: 'at sea', es: 'en el mar', 'zh-Hant': '海上', 'zh-Hans': '海上' }) : (a.village ?? a.town ?? a.city ?? a.municipality ?? j.name ?? null);
     if (names.size > 500) names.clear();
     names.set(key, name);
     return name;
@@ -105,19 +106,21 @@ function magColor(mag: number, colors: { inkDim: string; info: string; warn: str
 
 export const earthquakes = defineWidget({
   id: 'earthquakes',
-  name: { en: 'Earthquakes nearby', es: 'Terremotos cercanos' },
+  name: { en: 'Earthquakes nearby', es: 'Terremotos cercanos', 'zh-Hant': '附近地震', 'zh-Hans': '附近地震' },
   description: {
     en: 'Recent earthquakes around you (EMSC) on a polar map, with magnitude, place and time. Hidden when there are none (you can change that).',
     es: 'Los terremotos recientes a tu alrededor (EMSC) en un mapa polar, con magnitud, lugar y hora. Se oculta si no hay ninguno (se puede cambiar).',
+    'zh-Hant': '在極座標地圖上顯示你周圍的近期地震（EMSC），附規模、地點與時間。沒有地震時會隱藏（可以更改）。',
+    'zh-Hans': '在极坐标地图上显示你周围的近期地震（EMSC），附震级、地点和时间。没有地震时会隐藏（可以更改）。',
   },
   icon: 'activity',
   category: 'info',
   tags: ['magicmirror', 'seismic'],
   size: { min: { w: 280, h: 140 }, preferred: { w: 600, h: 300 } },
   options: t.object({
-    radiusKm: t.integer({ default: 150, min: 20, max: 2000, step: 10, unit: 'km', label: { en: 'Radius', es: 'Radio' } }),
-    days: t.integer({ default: 30, min: 1, max: 365, unit: 'd', label: { en: 'Days back', es: 'Días hacia atrás' } }),
-    minMagnitude: t.number({ default: 1.5, min: 0, max: 9, step: 0.1, label: { en: 'Minimum magnitude', es: 'Magnitud mínima' } }),
+    radiusKm: t.integer({ default: 150, min: 20, max: 2000, step: 10, unit: 'km', label: { en: 'Radius', es: 'Radio', 'zh-Hant': '半徑', 'zh-Hans': '半径' } }),
+    days: t.integer({ default: 30, min: 1, max: 365, unit: 'd', label: { en: 'Days back', es: 'Días hacia atrás', 'zh-Hant': '回溯天數', 'zh-Hans': '回溯天数' } }),
+    minMagnitude: t.number({ default: 1.5, min: 0, max: 9, step: 0.1, label: { en: 'Minimum magnitude', es: 'Magnitud mínima', 'zh-Hant': '最小規模', 'zh-Hans': '最小震级' } }),
     ...listOptions({ rows: 4 }),
     ...placeOptions(),
   }),
@@ -145,7 +148,7 @@ export const earthquakes = defineWidget({
   render(g, ctx) {
     const { options, data, now, box, theme, kit, locale, t: tr, fmt: f } = ctx;
     if (!data) return;
-    if (!data.quakes.length) return drawEmpty(g, ctx, tr({ en: `No earthquakes in ${options.days} d`, es: `Sin terremotos en ${options.days} d` }));
+    if (!data.quakes.length) return drawEmpty(g, ctx, tr({ en: `No earthquakes in ${options.days} d`, es: `Sin terremotos en ${options.days} d`, 'zh-Hant': `${options.days} 天內無地震`, 'zh-Hans': `${options.days} 天内无地震` }));
     const { colors, fonts } = theme;
     const { quakes, radiusKm } = data;
     const maxAge = options.days * 86_400_000;
@@ -219,7 +222,7 @@ export const earthquakes = defineWidget({
     if (plan.more) {
       // "+N more", and the strongest and the whole count, which say more about a quiet month.
       const strongest = quakes.reduce((a, b) => (b.mag > a.mag ? b : a));
-      const s = `${moreLabel(plan.hidden, tr)} · ${tr({ en: `strongest ${mag(strongest.mag)} · ${quakes.length} in ${options.days} d`, es: `el mayor, ${mag(strongest.mag)} · ${quakes.length} en ${options.days} d` })}`;
+      const s = `${moreLabel(plan.hidden, tr)} · ${tr({ en: `strongest ${mag(strongest.mag)} · ${quakes.length} in ${options.days} d`, es: `el mayor, ${mag(strongest.mag)} · ${quakes.length} en ${options.days} d`, 'zh-Hant': `最強 ${mag(strongest.mag)} · ${options.days} 天內 ${quakes.length} 次`, 'zh-Hans': `最强 ${mag(strongest.mag)} · ${options.days} 天内 ${quakes.length} 次` })}`;
       const m = plan.more;
       const size = Math.max(10, Math.round(m.h * 0.62));
       const font = { size, family: fonts.sans, color: colors.inkDim };

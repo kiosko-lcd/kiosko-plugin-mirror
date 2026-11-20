@@ -18,7 +18,7 @@ export { airquality, compliments, countdown, earthquakes, nowplaying, onthisday,
 
 export default definePlugin({
   id: 'mirror',
-  name: { en: 'Mirror cards', es: 'Tarjetas Mirror' },
+  name: { en: 'Mirror cards', es: 'Tarjetas Mirror', 'zh-Hant': 'Mirror 卡片', 'zh-Hans': 'Mirror 卡片' },
   version: '0.2.1',
   sdk: '^0.2.0',
   permissions: {
@@ -29,6 +29,8 @@ export default definePlugin({
   description: {
     en: 'MagicMirror²-style cards: countdown, compliments, today and tomorrow, now playing, on this day, air quality, earthquakes, rain radar and traffic.',
     es: 'Tarjetas al estilo de MagicMirror²: cuenta atrás, frases, hoy y mañana, lo que suena, tal día como hoy, calidad del aire, terremotos, radar de lluvia y tráfico.',
+    'zh-Hant': 'MagicMirror² 風格的卡片：倒數、讚美、今天與明天、正在播放、歷史上的今天、空氣品質、地震、降雨雷達與交通。',
+    'zh-Hans': 'MagicMirror² 风格的卡片：倒计时、夸夸、今天和明天、正在播放、历史上的今天、空气质量、地震、降雨雷达和路况。',
   },
   author: 'Kiosko',
   license: 'MIT',

@@ -106,7 +106,7 @@ test('now playing: reads gdbus output (GVariant as text) and picks the player', 
 
 test('air quality: European index bands and pollen levels', () => {
   assert.deepEqual([0, 20, 21, 55, 79, 100, 150].map((a) => aqiCategory(a).level), [0, 0, 1, 2, 3, 4, 5]);
-  assert.deepEqual(aqiCategory(25).label, { en: 'Fair', es: 'Razonablemente buena' });
+  assert.deepEqual(aqiCategory(25).label, { en: 'Fair', es: 'Razonablemente buena', 'zh-Hant': '尚可', 'zh-Hans': '一般' });
   assert.deepEqual([40, 51, 120, 160, 250, 400].map((a) => aqiCategory(a, 'us').level), [0, 1, 2, 3, 4, 5]);
   assert.equal(parseAir({ us_aqi: 87.4, european_aqi: 30 }, 'us').aqi, 87);
   assert.equal(parseAir({ us_aqi: 87.4, european_aqi: 30 }).aqi, 30);

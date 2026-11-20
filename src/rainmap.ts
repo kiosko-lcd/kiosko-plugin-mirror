@@ -117,17 +117,19 @@ function drawSampleRadar(g: Graphics, box: Box, kit: RenderContext<unknown, unkn
 
 export const rainmap = defineWidget({
   id: 'rainmap',
-  name: { en: 'Rain radar', es: 'Radar de lluvia' },
+  name: { en: 'Rain radar', es: 'Radar de lluvia', 'zh-Hant': '降雨雷達', 'zh-Hans': '降雨雷达' },
   description: {
     en: 'Latest rain radar (RainViewer) over a dark OpenStreetMap map, home in the centre. By default only shows while it rains nearby.',
     es: 'El último radar de lluvia (RainViewer) sobre un mapa oscuro de OpenStreetMap, con casa en el centro. Por defecto sólo sale si llueve cerca.',
+    'zh-Hant': '最新的降雨雷達（RainViewer），疊在深色的 OpenStreetMap 地圖上，家在中央。預設只在附近下雨時顯示。',
+    'zh-Hans': '最新的降雨雷达（RainViewer），叠加在深色的 OpenStreetMap 地图上，家在中心。默认只在附近下雨时显示。',
   },
   icon: 'cloud-rain',
   category: 'info',
   tags: ['magicmirror', 'weather', 'radar', 'map'],
   size: { min: { w: 200, h: 140 }, preferred: { w: 600, h: 440 } },
   options: t.object({
-    onlyWhenRaining: t.boolean({ default: true, label: { en: 'Only while it rains nearby', es: 'Sólo si llueve cerca' } }),
+    onlyWhenRaining: t.boolean({ default: true, label: { en: 'Only while it rains nearby', es: 'Sólo si llueve cerca', 'zh-Hant': '只在附近下雨時', 'zh-Hans': '仅在附近下雨时' } }),
     ...placeOptions(),
   }),
   intervalMs: 10 * 60_000,
