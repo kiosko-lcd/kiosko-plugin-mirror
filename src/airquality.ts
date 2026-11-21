@@ -61,14 +61,18 @@ const BANDS: { max: number; label: Localized }[] = [
   { max: Infinity, label: { en: 'Extremely poor', es: 'Extremadamente desfavorable', 'zh-Hant': '極差', 'zh-Hans': '极差', de: 'Extrem schlecht' } },
 ];
 
-/** The bands of the US EPA index (AirNow's names). */
+/**
+ * The bands of the US EPA index (AirNow's names). Taiwan's AQI has the same
+ * bands and names (良好 … 危害); mainland China's AQI has the same bands too,
+ * named 优、良、轻度污染…严重污染, the words a reader there knows.
+ */
 const US_BANDS: { max: number; label: Localized }[] = [
-  { max: 50, label: { en: 'Good', es: 'Buena', 'zh-Hant': '良好', 'zh-Hans': '良好', de: 'Gut' } },
-  { max: 100, label: { en: 'Moderate', es: 'Moderada', 'zh-Hant': '普通', 'zh-Hans': '中等', de: 'Mäßig' } },
-  { max: 150, label: { en: 'Unhealthy for sensitive groups', es: 'Dañina para grupos sensibles', 'zh-Hant': '對敏感族群不健康', 'zh-Hans': '对敏感人群不健康', de: 'Ungesund für empfindliche Gruppen' } },
-  { max: 200, label: { en: 'Unhealthy', es: 'Dañina', 'zh-Hant': '對所有族群不健康', 'zh-Hans': '不健康', de: 'Ungesund' } },
-  { max: 300, label: { en: 'Very unhealthy', es: 'Muy dañina', 'zh-Hant': '非常不健康', 'zh-Hans': '非常不健康', de: 'Sehr ungesund' } },
-  { max: Infinity, label: { en: 'Hazardous', es: 'Peligrosa', 'zh-Hant': '危害', 'zh-Hans': '危险', de: 'Gefährlich' } },
+  { max: 50, label: { en: 'Good', es: 'Buena', 'zh-Hant': '良好', 'zh-Hans': '优', de: 'Gut' } },
+  { max: 100, label: { en: 'Moderate', es: 'Moderada', 'zh-Hant': '普通', 'zh-Hans': '良', de: 'Mäßig' } },
+  { max: 150, label: { en: 'Unhealthy for sensitive groups', es: 'Dañina para grupos sensibles', 'zh-Hant': '對敏感族群不健康', 'zh-Hans': '轻度污染', de: 'Ungesund für empfindliche Gruppen' } },
+  { max: 200, label: { en: 'Unhealthy', es: 'Dañina', 'zh-Hant': '對所有族群不健康', 'zh-Hans': '中度污染', de: 'Ungesund' } },
+  { max: 300, label: { en: 'Very unhealthy', es: 'Muy dañina', 'zh-Hant': '非常不健康', 'zh-Hans': '重度污染', de: 'Sehr ungesund' } },
+  { max: Infinity, label: { en: 'Hazardous', es: 'Peligrosa', 'zh-Hant': '危害', 'zh-Hans': '严重污染', de: 'Gefährlich' } },
 ];
 
 /** The index's name on the card. */
@@ -130,7 +134,7 @@ export const airquality = defineWidget({
         en: '0: always. Otherwise it takes its turn only when the index reaches this, on its own scale (European: 40 is moderate, 60 poor; US: 100 is unhealthy for sensitive groups).',
         es: '0: siempre. Si no, sólo sale cuando el índice llega a esto, en su escala (europeo: 40 es regular, 60 desfavorable; EE. UU.: 100 es dañina para grupos sensibles).',
         'zh-Hant': '0：一律顯示。否則只在指標達到此值時才輪到它，依各自的標準（歐洲：40 為普通，60 為不良；美國：100 為對敏感族群不健康）。',
-        'zh-Hans': '0：始终显示。否则只在指数达到此值时才轮到它，按各自的标准（欧洲：40 为中等，60 为较差；美国：100 为对敏感人群不健康）。',
+        'zh-Hans': '0：始终显示。否则只在指数达到此值时才轮到它，按各自的标准（欧洲：40 为中等，60 为较差；美国：100 为轻度污染）。',
         de: '0: immer. Sonst ist sie nur an der Reihe, wenn der Index diesen Wert erreicht, auf seiner eigenen Skala (europäisch: 40 ist mäßig, 60 schlecht; US: 100 ist ungesund für empfindliche Gruppen).',
       },
     }),

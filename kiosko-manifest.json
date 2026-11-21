@@ -9,7 +9,7 @@
     "zh-Hans": "Mirror 卡片",
     "de": "Mirror-Karten"
   },
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": {
     "en": "MagicMirror²-style cards: countdown, compliments, today and tomorrow, now playing, on this day, air quality, earthquakes, rain radar and traffic.",
     "es": "Tarjetas al estilo de MagicMirror²: cuenta atrás, frases, hoy y mañana, lo que suena, tal día como hoy, calidad del aire, terremotos, radar de lluvia y tráfico.",
@@ -1019,7 +1019,7 @@
                 "en": "0: always. Otherwise it takes its turn only when the index reaches this, on its own scale (European: 40 is moderate, 60 poor; US: 100 is unhealthy for sensitive groups).",
                 "es": "0: siempre. Si no, sólo sale cuando el índice llega a esto, en su escala (europeo: 40 es regular, 60 desfavorable; EE. UU.: 100 es dañina para grupos sensibles).",
                 "zh-Hant": "0：一律顯示。否則只在指標達到此值時才輪到它，依各自的標準（歐洲：40 為普通，60 為不良；美國：100 為對敏感族群不健康）。",
-                "zh-Hans": "0：始终显示。否则只在指数达到此值时才轮到它，按各自的标准（欧洲：40 为中等，60 为较差；美国：100 为对敏感人群不健康）。",
+                "zh-Hans": "0：始终显示。否则只在指数达到此值时才轮到它，按各自的标准（欧洲：40 为中等，60 为较差；美国：100 为轻度污染）。",
                 "de": "0: immer. Sonst ist sie nur an der Reihe, wenn der Index diesen Wert erreicht, auf seiner eigenen Skala (europäisch: 40 ist mäßig, 60 schlecht; US: 100 ist ungesund für empfindliche Gruppen)."
               }
             },
