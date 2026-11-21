@@ -19,7 +19,7 @@ export { airquality, compliments, countdown, earthquakes, nowplaying, onthisday,
 export default definePlugin({
   id: 'mirror',
   name: { en: 'Mirror cards', es: 'Tarjetas Mirror', 'zh-Hant': 'Mirror 卡片', 'zh-Hans': 'Mirror 卡片', de: 'Mirror-Karten' },
-  version: '0.2.1',
+  version: '0.2.2',
   languages: ['en', 'es', 'zh-Hant', 'zh-Hans', 'de'],
   sdk: '^0.2.0',
   permissions: {
